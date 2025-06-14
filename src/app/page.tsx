@@ -28,7 +28,7 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-white drop-shadow-lg">
-              Discover Dubai with <span className="text-primary">Tourista</span>
+              Discover Dubai with <span className="text-primary">Kosheli Travel</span>
             </h1>
             <p className="mt-4 text-lg sm:text-xl text-slate-200 max-w-2xl drop-shadow-md">
               Your ultimate gateway to unforgettable flights and adventures in the heart of the Emirates.

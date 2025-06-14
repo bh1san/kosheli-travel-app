@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { CartProvider } from '@/contexts/CartContext';
 
 export const metadata: Metadata = {
-  title: 'Tourista - Your Dubai Travel Expert',
-  description: 'Book flights and Dubai outdoor activities with Tourista.',
+  title: 'Kosheli Travel - Your Dubai Travel Expert',
+  description: 'Book flights and Dubai outdoor activities with Kosheli Travel.',
 };
 
 export default function RootLayout({
