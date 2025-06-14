@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -8,6 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Plane, ArrowRight, Clock, DollarSign, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { useState, useEffect } from 'react';
 
 interface FlightCardProps {
   flight: Flight;
@@ -15,13 +17,20 @@ interface FlightCardProps {
 
 export function FlightCard({ flight }: FlightCardProps) {
   const { addToCart } = useCart();
+  const [formattedDepartureTime, setFormattedDepartureTime] = useState<string | null>(null);
+  const [formattedArrivalTime, setFormattedArrivalTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Perform date formatting on the client side to avoid hydration mismatch
+    const departureDateTime = new Date(flight.departureTime);
+    const arrivalDateTime = new Date(flight.arrivalTime);
+    setFormattedDepartureTime(format(departureDateTime, 'MMM d, HH:mm'));
+    setFormattedArrivalTime(format(arrivalDateTime, 'MMM d, HH:mm'));
+  }, [flight.departureTime, flight.arrivalTime]);
 
   const handleAddToCart = () => {
     addToCart(flight, 'flight');
   };
-
-  const departureDateTime = new Date(flight.departureTime);
-  const arrivalDateTime = new Date(flight.arrivalTime);
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
@@ -51,13 +60,13 @@ export function FlightCard({ flight }: FlightCardProps) {
           <div className="flex flex-col items-start">
             <span className="font-semibold text-lg">{flight.departureAirportCode}</span>
             <span className="text-muted-foreground text-xs">{flight.departureCity}</span>
-            <span className="text-xs">{format(departureDateTime, 'MMM d, HH:mm')}</span>
+            <span className="text-xs">{formattedDepartureTime || 'Loading...'}</span>
           </div>
           <ArrowRight size={20} className="text-primary mx-2" />
           <div className="flex flex-col items-end">
             <span className="font-semibold text-lg">{flight.arrivalAirportCode}</span>
             <span className="text-muted-foreground text-xs">{flight.arrivalCity}</span>
-            <span className="text-xs">{format(arrivalDateTime, 'MMM d, HH:mm')}</span>
+            <span className="text-xs">{formattedArrivalTime || 'Loading...'}</span>
           </div>
         </div>
         
