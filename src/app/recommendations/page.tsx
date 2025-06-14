@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { RecommendationForm } from '@/components/recommendations/RecommendationForm';
 import { RecommendationResults } from '@/components/recommendations/RecommendationResults';
-import { getPersonalizedRecommendations } from '@/actions/recommendations';
+import getPersonalizedRecommendations from '@/actions/recommendations'; // Changed to default import
 import type { PersonalizedRecommendationsInput, PersonalizedRecommendationsOutput } from '@/ai/flows/personalized-recommendations';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
