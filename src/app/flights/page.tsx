@@ -1,0 +1,50 @@
+import { FlightList } from '@/components/flights/FlightList';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { mockFlights } from '@/lib/mockData';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+
+export default function FlightsPage() {
+  // In a real app, flights would be fetched based on search criteria
+  const flights = mockFlights;
+
+  return (
+    <MainLayout>
+      <div className="space-y-8">
+        <section className="text-center py-8 bg-card shadow-md rounded-lg">
+          <h1 className="text-4xl font-bold font-headline text-primary">Find Your Perfect Flight</h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            Explore a wide range of flights to Dubai and other destinations. Enter your details to start your journey.
+          </p>
+        </section>
+
+        <section className="bg-card p-6 rounded-lg shadow-md">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div>
+              <label htmlFor="departure" className="block text-sm font-medium text-foreground mb-1">From</label>
+              <Input type="text" id="departure" placeholder="e.g., New York (JFK)" className="font-body"/>
+            </div>
+            <div>
+              <label htmlFor="destination" className="block text-sm font-medium text-foreground mb-1">To</label>
+              <Input type="text" id="destination" placeholder="e.g., Dubai (DXB)" className="font-body"/>
+            </div>
+            <div>
+              <label htmlFor="departure-date" className="block text-sm font-medium text-foreground mb-1">Departure Date</label>
+              <Input type="date" id="departure-date" className="font-body"/>
+            </div>
+            <Button className="w-full lg:w-auto font-body" aria-label="Search flights">
+              <Search size={18} className="mr-2" />
+              Search Flights
+            </Button>
+          </div>
+        </section>
+        
+        <section>
+          <h2 className="text-3xl font-headline font-semibold mb-6 text-center md:text-left">Available Flights</h2>
+          <FlightList flights={flights} />
+        </section>
+      </div>
+    </MainLayout>
+  );
+}

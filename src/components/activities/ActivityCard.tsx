@@ -1,0 +1,63 @@
+'use client';
+
+import Image from 'next/image';
+import type { Activity } from '@/types';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useCart } from '@/contexts/CartContext';
+import { MapPin, Star, DollarSign, ShoppingCart } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+
+interface ActivityCardProps {
+  activity: Activity;
+}
+
+export function ActivityCard({ activity }: ActivityCardProps) {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart(activity, 'activity');
+  };
+
+  return (
+    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+      <CardHeader className="p-0 relative">
+        <Image
+          src={activity.imageUrl}
+          alt={activity.name}
+          width={600}
+          height={400}
+          className="w-full h-48 object-cover"
+          data-ai-hint={activity.dataAiHint || 'dubai activity'}
+        />
+         <div className="absolute top-2 right-2">
+          <Badge variant="secondary" className="bg-black/50 text-white backdrop-blur-sm">
+             {activity.category}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 flex-grow space-y-2">
+        <CardTitle className="text-xl font-headline">{activity.name}</CardTitle>
+        <div className="flex items-center text-sm text-muted-foreground">
+          <MapPin size={16} className="mr-1 text-primary" />
+          <span>{activity.location}</span>
+        </div>
+        <CardDescription className="text-sm text-foreground/80 line-clamp-3">{activity.description}</CardDescription>
+        <div className="flex items-center">
+          <Star size={16} className="mr-1 text-yellow-400 fill-yellow-400" />
+          <span className="text-sm font-semibold">{activity.rating.toFixed(1)}</span>
+        </div>
+      </CardContent>
+      <CardFooter className="p-4 bg-muted/30 flex items-center justify-between">
+        <div className="flex items-center text-primary">
+          <DollarSign size={20} className="mr-1" />
+          <span className="text-xl font-bold">{activity.price > 0 ? activity.price.toFixed(2) : 'Free'}</span>
+        </div>
+        <Button onClick={handleAddToCart} variant="default" size="sm" aria-label={`Add ${activity.name} to cart`}>
+          <ShoppingCart size={16} className="mr-2" />
+          Add to Cart
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
