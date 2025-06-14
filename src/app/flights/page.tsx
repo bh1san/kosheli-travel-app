@@ -19,25 +19,34 @@ export default function FlightsPage() {
   const handleSearchFlights = () => {
     let tempFlights = mockFlights;
 
-    if (departureSearch.trim()) {
+    const departureQuery = departureSearch.toLowerCase().trim();
+    if (departureQuery) {
       tempFlights = tempFlights.filter(flight =>
-        flight.departureCity.toLowerCase().includes(departureSearch.toLowerCase().trim()) ||
-        flight.departureAirportCode.toLowerCase().includes(departureSearch.toLowerCase().trim())
+        (flight.departureCity && typeof flight.departureCity === 'string' && flight.departureCity.toLowerCase().includes(departureQuery)) ||
+        (flight.departureAirportCode && typeof flight.departureAirportCode === 'string' && flight.departureAirportCode.toLowerCase().includes(departureQuery))
       );
     }
 
-    if (destinationSearch.trim()) {
+    const destinationQuery = destinationSearch.toLowerCase().trim();
+    if (destinationQuery) {
       tempFlights = tempFlights.filter(flight =>
-        flight.arrivalCity.toLowerCase().includes(destinationSearch.toLowerCase().trim()) ||
-        flight.arrivalAirportCode.toLowerCase().includes(destinationSearch.toLowerCase().trim())
+        (flight.arrivalCity && typeof flight.arrivalCity === 'string' && flight.arrivalCity.toLowerCase().includes(destinationQuery)) ||
+        (flight.arrivalAirportCode && typeof flight.arrivalAirportCode === 'string' && flight.arrivalAirportCode.toLowerCase().includes(destinationQuery))
       );
     }
 
-    if (dateSearch) { // dateSearch is in YYYY-MM-DD format from <input type="date">
+    if (dateSearch) {
       tempFlights = tempFlights.filter(flight => {
-        // Extract YYYY-MM-DD from the flight's ISO departureTime string
-        const flightDepartureDate = new Date(flight.departureTime).toISOString().split('T')[0];
-        return flightDepartureDate === dateSearch;
+        if (!flight.departureTime || typeof flight.departureTime !== 'string') {
+          return false;
+        }
+        try {
+          const flightDepartureDate = new Date(flight.departureTime).toISOString().split('T')[0];
+          return flightDepartureDate === dateSearch;
+        } catch (e) {
+          // If date parsing fails, exclude the flight
+          return false;
+        }
       });
     }
     setFilteredFlights(tempFlights);
