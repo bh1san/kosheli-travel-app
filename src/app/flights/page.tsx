@@ -1,3 +1,8 @@
+
+'use client';
+
+import { useState } from 'react';
+import type { Flight } from '@/types';
 import { FlightList } from '@/components/flights/FlightList';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { mockFlights } from '@/lib/mockData';
@@ -6,8 +11,37 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
 export default function FlightsPage() {
-  // In a real app, flights would be fetched based on search criteria
-  const flights = mockFlights;
+  const [departureSearch, setDepartureSearch] = useState('');
+  const [destinationSearch, setDestinationSearch] = useState('');
+  const [dateSearch, setDateSearch] = useState('');
+  const [filteredFlights, setFilteredFlights] = useState<Flight[]>(mockFlights);
+
+  const handleSearchFlights = () => {
+    let tempFlights = mockFlights;
+
+    if (departureSearch.trim()) {
+      tempFlights = tempFlights.filter(flight =>
+        flight.departureCity.toLowerCase().includes(departureSearch.toLowerCase().trim()) ||
+        flight.departureAirportCode.toLowerCase().includes(departureSearch.toLowerCase().trim())
+      );
+    }
+
+    if (destinationSearch.trim()) {
+      tempFlights = tempFlights.filter(flight =>
+        flight.arrivalCity.toLowerCase().includes(destinationSearch.toLowerCase().trim()) ||
+        flight.arrivalAirportCode.toLowerCase().includes(destinationSearch.toLowerCase().trim())
+      );
+    }
+
+    if (dateSearch) { // dateSearch is in YYYY-MM-DD format from <input type="date">
+      tempFlights = tempFlights.filter(flight => {
+        // Extract YYYY-MM-DD from the flight's ISO departureTime string
+        const flightDepartureDate = new Date(flight.departureTime).toISOString().split('T')[0];
+        return flightDepartureDate === dateSearch;
+      });
+    }
+    setFilteredFlights(tempFlights);
+  };
 
   return (
     <MainLayout>
@@ -23,17 +57,41 @@ export default function FlightsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
               <label htmlFor="departure" className="block text-sm font-medium text-foreground mb-1">From</label>
-              <Input type="text" id="departure" placeholder="e.g., New York (JFK)" className="font-body"/>
+              <Input 
+                type="text" 
+                id="departure" 
+                placeholder="e.g., New York (JFK)" 
+                className="font-body"
+                value={departureSearch}
+                onChange={(e) => setDepartureSearch(e.target.value)}
+              />
             </div>
             <div>
               <label htmlFor="destination" className="block text-sm font-medium text-foreground mb-1">To</label>
-              <Input type="text" id="destination" placeholder="e.g., Dubai (DXB)" className="font-body"/>
+              <Input 
+                type="text" 
+                id="destination" 
+                placeholder="e.g., Dubai (DXB)" 
+                className="font-body"
+                value={destinationSearch}
+                onChange={(e) => setDestinationSearch(e.target.value)}
+              />
             </div>
             <div>
               <label htmlFor="departure-date" className="block text-sm font-medium text-foreground mb-1">Departure Date</label>
-              <Input type="date" id="departure-date" className="font-body"/>
+              <Input 
+                type="date" 
+                id="departure-date" 
+                className="font-body"
+                value={dateSearch}
+                onChange={(e) => setDateSearch(e.target.value)}
+              />
             </div>
-            <Button className="w-full lg:w-auto font-body" aria-label="Search flights">
+            <Button 
+              className="w-full lg:w-auto font-body" 
+              aria-label="Search flights"
+              onClick={handleSearchFlights}
+            >
               <Search size={18} className="mr-2" />
               Search Flights
             </Button>
@@ -42,7 +100,7 @@ export default function FlightsPage() {
         
         <section>
           <h2 className="text-3xl font-headline font-semibold mb-6 text-center md:text-left">Available Flights</h2>
-          <FlightList flights={flights} />
+          <FlightList flights={filteredFlights} />
         </section>
       </div>
     </MainLayout>
