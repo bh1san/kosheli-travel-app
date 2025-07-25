@@ -1,3 +1,4 @@
+
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -7,6 +8,7 @@ import { PromotionList } from '@/components/promotions/PromotionList';
 import { ActivityCard } from '@/components/activities/ActivityCard';
 import { FlightCard } from '@/components/flights/FlightCard';
 import { Plane, MapPin, Sparkles, Ticket } from 'lucide-react';
+import { FlightSearchForm } from '@/components/flights/FlightSearchForm';
 
 export default function HomePage() {
   const featuredPromotions = mockPromotions.slice(0, 3);
@@ -48,6 +50,14 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
+        </section>
+        
+        {/* Flight Search Section */}
+        <section className="-mt-20 relative z-10 mx-auto w-full max-w-5xl px-4">
+          <FlightSearchForm />
+           <p className="text-center text-xs text-muted-foreground mt-2">
+            Live prices as shown on <Link href="https://www.skyscanner.ae/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">skyscanner.ae</Link>
+          </p>
         </section>
 
         {/* Featured Promotions */}
