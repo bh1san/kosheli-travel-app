@@ -60,7 +60,7 @@ export function CartView() {
                   {item.details.departureAirportCode} to {item.details.arrivalAirportCode}
                 </p>
               )}
-              <p className="text-lg font-semibold text-primary">${item.details.price.toFixed(2)}</p>
+              <p className="text-lg font-semibold text-primary">{item.details.price.toFixed(2)} AED</p>
             </div>
             <div className="p-4 flex flex-col md:flex-row items-center justify-between md:w-1/3 space-y-2 md:space-y-0 md:space-x-2 bg-muted/30">
               <div className="flex items-center space-x-2">
@@ -88,7 +88,7 @@ export function CartView() {
           <CardContent className="space-y-3">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${getTotalPrice().toFixed(2)}</span>
+              <span>{getTotalPrice().toFixed(2)} AED</span>
             </div>
             <div className="flex justify-between">
               <span>Taxes & Fees</span>
@@ -97,7 +97,7 @@ export function CartView() {
             <hr />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>${getTotalPrice().toFixed(2)}</span>
+              <span>{getTotalPrice().toFixed(2)} AED</span>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">

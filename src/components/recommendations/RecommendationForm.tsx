@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, Calendar, DollarSign, ListChecks } from 'lucide-react';
+import { Sparkles, Calendar, ListChecks } from 'lucide-react';
 
 const recommendationFormSchema = z.object({
   travelDates: z.string().min(1, { message: 'Travel dates are required.' }),
@@ -62,9 +62,12 @@ export function RecommendationForm({ onSubmit, isLoading }: RecommendationFormPr
               name="budget"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1"><DollarSign size={16}/>Budget (USD)</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    <span className="font-semibold">AED</span>
+                    <span className="ml-1">Budget</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="e.g., 1500" {...field} />
+                    <Input type="number" placeholder="e.g., 5500" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

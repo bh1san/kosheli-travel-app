@@ -5,7 +5,7 @@ import type { Activity } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
-import { MapPin, Star, DollarSign, ShoppingCart } from 'lucide-react';
+import { MapPin, Star, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ActivityCardProps {
@@ -49,9 +49,9 @@ export function ActivityCard({ activity }: ActivityCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 bg-muted/30 flex items-center justify-between">
-        <div className="flex items-center text-primary">
-          <DollarSign size={20} className="mr-1" />
+        <div className="flex items-baseline text-primary">
           <span className="text-xl font-bold">{activity.price > 0 ? activity.price.toFixed(2) : 'Free'}</span>
+           {activity.price > 0 && <span className="text-sm font-semibold ml-1">AED</span>}
         </div>
         <Button onClick={handleAddToCart} variant="default" size="sm" aria-label={`Add ${activity.name} to cart`}>
           <ShoppingCart size={16} className="mr-2" />

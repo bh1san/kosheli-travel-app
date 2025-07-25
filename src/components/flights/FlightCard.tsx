@@ -6,7 +6,7 @@ import type { Flight } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
-import { Plane, ArrowRight, Clock, DollarSign, ShoppingCart } from 'lucide-react';
+import { Plane, ArrowRight, Clock, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
@@ -76,9 +76,9 @@ export function FlightCard({ flight }: FlightCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 bg-muted/30 flex items-center justify-between">
-        <div className="flex items-center text-primary">
-          <DollarSign size={20} className="mr-1" />
+        <div className="flex items-baseline text-primary">
           <span className="text-xl font-bold">{flight.price.toFixed(2)}</span>
+          <span className="text-sm font-semibold ml-1">AED</span>
         </div>
         <Button onClick={handleAddToCart} variant="default" size="sm" aria-label={`Add ${flight.airline} flight to cart`}>
           <ShoppingCart size={16} className="mr-2" />
