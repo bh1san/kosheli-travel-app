@@ -1,23 +1,21 @@
+
 'use client';
 
 import Image from 'next/image';
 import type { Activity } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
-import { MapPin, Star, ShoppingCart } from 'lucide-react';
+import { MapPin, Star, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 interface ActivityCardProps {
   activity: Activity;
 }
 
 export function ActivityCard({ activity }: ActivityCardProps) {
-  const { addToCart } = useCart();
 
-  const handleAddToCart = () => {
-    addToCart(activity, 'activity');
-  };
+  const bookingLink = `/contact?type=activity&item=${encodeURIComponent(activity.name)}&price=${activity.price}`;
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
@@ -53,9 +51,11 @@ export function ActivityCard({ activity }: ActivityCardProps) {
           <span className="text-xl font-bold">{activity.price > 0 ? activity.price.toFixed(2) : 'Free'}</span>
            {activity.price > 0 && <span className="text-sm font-semibold ml-1">AED</span>}
         </div>
-        <Button onClick={handleAddToCart} variant="default" size="sm" aria-label={`Add ${activity.name} to cart`}>
-          <ShoppingCart size={16} className="mr-2" />
-          Add to Cart
+        <Button asChild variant="default" size="sm" aria-label={`Book ${activity.name} now`}>
+          <Link href={bookingLink}>
+            <Send size={16} className="mr-2" />
+            Book Now
+          </Link>
         </Button>
       </CardFooter>
     </Card>

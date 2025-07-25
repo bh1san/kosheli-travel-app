@@ -1,16 +1,15 @@
+
 'use client';
 
 import Link from 'next/link';
-import { Plane, MapPin, Sparkles, ShoppingCart, Ticket, Menu, Globe, Paperclip } from 'lucide-react';
+import { Plane, MapPin, Sparkles, Ticket, Menu, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
-import { Badge } from '@/components/ui/badge';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const NavLink = ({ href, children, icon, onClick }: { href: string; children: React.ReactNode; icon?: React.ReactNode, onClick?: () => void }) => (
   <Link href={href} passHref>
@@ -22,14 +21,7 @@ const NavLink = ({ href, children, icon, onClick }: { href: string; children: Re
 );
 
 export function Header() {
-  const { getItemCount } = useCart();
-  const [cartItemCount, setCartItemCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    setCartItemCount(getItemCount());
-  }, [getItemCount, getItemCount()]); // Re-run effect when getItemCount or its return value changes
-
 
   const navItems = (
     <>
@@ -37,18 +29,7 @@ export function Header() {
       <NavLink href="/activities" icon={<MapPin size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Activities</NavLink>
       <NavLink href="/promotions" icon={<Ticket size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Promotions</NavLink>
       <NavLink href="/recommendations" icon={<Sparkles size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Recommendations</NavLink>
-      <Link href="/cart" passHref>
-        <Button variant="ghost" className="text-foreground hover:bg-primary/10 relative" onClick={() => setIsMobileMenuOpen(false)}>
-          <ShoppingCart size={20} />
-          {cartItemCount > 0 && (
-            <Badge variant="destructive" className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs">
-              {cartItemCount}
-            </Badge>
-          )}
-          <span className="sr-only">View Cart</span>
-           <span className="ml-2 md:hidden">Cart</span>
-        </Button>
-      </Link>
+      <NavLink href="/contact" icon={<Send size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Contact</NavLink>
     </>
   );
 

@@ -5,32 +5,28 @@ import Image from 'next/image';
 import type { Flight } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
-import { Plane, ArrowRight, Clock, ShoppingCart } from 'lucide-react';
+import { Plane, ArrowRight, Clock, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface FlightCardProps {
   flight: Flight;
 }
 
 export function FlightCard({ flight }: FlightCardProps) {
-  const { addToCart } = useCart();
   const [formattedDepartureTime, setFormattedDepartureTime] = useState<string | null>(null);
   const [formattedArrivalTime, setFormattedArrivalTime] = useState<string | null>(null);
 
   useEffect(() => {
-    // Perform date formatting on the client side to avoid hydration mismatch
     const departureDateTime = new Date(flight.departureTime);
     const arrivalDateTime = new Date(flight.arrivalTime);
     setFormattedDepartureTime(format(departureDateTime, 'MMM d, HH:mm'));
     setFormattedArrivalTime(format(arrivalDateTime, 'MMM d, HH:mm'));
   }, [flight.departureTime, flight.arrivalTime]);
 
-  const handleAddToCart = () => {
-    addToCart(flight, 'flight');
-  };
+  const bookingLink = `/contact?type=flight&item=${encodeURIComponent(`${flight.airline} flight from ${flight.departureAirportCode} to ${flight.arrivalAirportCode}`)}&price=${flight.price}`;
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
@@ -80,9 +76,11 @@ export function FlightCard({ flight }: FlightCardProps) {
           <span className="text-xl font-bold">{flight.price.toFixed(2)}</span>
           <span className="text-sm font-semibold ml-1">AED</span>
         </div>
-        <Button onClick={handleAddToCart} variant="default" size="sm" aria-label={`Add ${flight.airline} flight to cart`}>
-          <ShoppingCart size={16} className="mr-2" />
-          Add to Cart
+        <Button asChild variant="default" size="sm" aria-label={`Book ${flight.airline} flight now`}>
+          <Link href={bookingLink}>
+            <Send size={16} className="mr-2" />
+            Book Now
+          </Link>
         </Button>
       </CardFooter>
     </Card>
