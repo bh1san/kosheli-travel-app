@@ -2,27 +2,39 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plane, ActivitySquare, TicketPercent, BarChart3, Users } from "lucide-react";
+import { Plane, ActivitySquare, TicketPercent, BarChart3, Users, Image as ImageIcon } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const managementSections = [
     {
       title: "Manage Flights",
       description: "Add, edit, or remove flight listings.",
-      link: "/admin/flights", // Placeholder link
+      link: "/admin/flights", 
       icon: <Plane className="h-6 w-6 text-primary" />,
     },
     {
       title: "Manage Activities",
       description: "Update activity details, prices, and availability.",
-      link: "/admin/activities", // Placeholder link
+      link: "/admin/activities",
       icon: <ActivitySquare className="h-6 w-6 text-primary" />,
     },
     {
       title: "Manage Promotions",
       description: "Create and manage promotional offers.",
-      link: "/admin/promotions", // Placeholder link
+      link: "/admin/promotions",
       icon: <TicketPercent className="h-6 w-6 text-primary" />,
+    },
+    {
+      title: "Manage Users",
+      description: "View and manage user accounts.",
+      link: "/admin/users",
+      icon: <Users className="h-6 w-6 text-primary" />,
+    },
+     {
+      title: "Manage Site Content",
+      description: "Update site banners and images.",
+      link: "/admin/content",
+      icon: <ImageIcon className="h-6 w-6 text-primary" />,
     },
     // Future sections
     // {
@@ -30,12 +42,6 @@ export default function AdminDashboardPage() {
     //   description: "Track bookings, user engagement, and site traffic.",
     //   link: "/admin/analytics",
     //   icon: <BarChart3 className="h-6 w-6 text-primary" />,
-    // },
-    // {
-    //   title: "User Management",
-    //   description: "View and manage user accounts.",
-    //   link: "/admin/users",
-    //   icon: <Users className="h-6 w-6 text-primary" />,
     // },
   ];
 

@@ -13,13 +13,15 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut, Users, Image as ImageIcon } from 'lucide-react';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: <LayoutDashboard /> },
   { href: '/admin/flights', label: 'Flights', icon: <Plane /> },
   { href: '/admin/activities', label: 'Activities', icon: <ActivitySquare /> },
   { href: '/admin/promotions', label: 'Promotions', icon: <TicketPercent /> },
+  { href: '/admin/users', label: 'Users', icon: <Users /> },
+  { href: '/admin/content', label: 'Content', icon: <ImageIcon /> },
   // { href: '/admin/settings', label: 'Settings', icon: <Settings /> }, // Future item
 ];
 
