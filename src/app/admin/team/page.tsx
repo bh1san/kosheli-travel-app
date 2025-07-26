@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 
 const TEAM_STORAGE_KEY = 'adminTeam';
 
@@ -136,7 +135,8 @@ export default function AdminTeamPage() {
             {teamMembers.map((member) => (
               <TableRow key={member.id}>
                 <TableCell>
-                  <Image src={member.imageUrl} alt={member.name} width={60} height={60} className="rounded-full object-cover" key={member.imageUrl}/>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={member.imageUrl} alt={member.name} width={60} height={60} className="rounded-full object-cover" key={member.imageUrl}/>
                 </TableCell>
                 <TableCell>{member.name}</TableCell>
                 <TableCell>{member.role}</TableCell>

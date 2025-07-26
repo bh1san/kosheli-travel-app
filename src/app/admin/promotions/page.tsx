@@ -26,7 +26,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
-import Image from 'next/image';
 
 const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
 
@@ -157,7 +156,8 @@ export default function AdminPromotionsPage() {
             {promotions.map((promo) => (
               <TableRow key={promo.id}>
                 <TableCell>
-                  <Image src={promo.imageUrl} alt={promo.title} width={80} height={50} className="rounded-md object-cover" key={promo.imageUrl}/>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={promo.imageUrl} alt={promo.title} width={80} height={50} className="rounded-md object-cover" key={promo.imageUrl}/>
                 </TableCell>
                 <TableCell>{promo.title}</TableCell>
                 <TableCell>{promo.type}</TableCell>

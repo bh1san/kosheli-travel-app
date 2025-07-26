@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 
 const ACTIVITIES_STORAGE_KEY = 'adminActivities';
 
@@ -139,7 +138,8 @@ export default function AdminActivitiesPage() {
             {activities.map((activity) => (
               <TableRow key={activity.id}>
                 <TableCell>
-                  <Image src={activity.imageUrl} alt={activity.name} width={80} height={50} className="rounded-md object-cover" key={activity.imageUrl}/>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={activity.imageUrl} alt={activity.name} width={80} height={50} className="rounded-md object-cover" key={activity.imageUrl}/>
                 </TableCell>
                 <TableCell>{activity.name}</TableCell>
                 <TableCell>{activity.category}</TableCell>
