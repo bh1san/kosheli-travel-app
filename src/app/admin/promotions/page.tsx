@@ -43,6 +43,7 @@ export default function AdminPromotionsPage() {
   const persistPromotions = (updatedPromotions: Promotion[]) => {
     setPromotions(updatedPromotions);
     localStorage.setItem(PROMOTIONS_STORAGE_KEY, JSON.stringify(updatedPromotions));
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -103,7 +104,7 @@ export default function AdminPromotionsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold font-headline">Manage Promotions</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => {if(!isOpen) closeDialog()}}>
           <DialogTrigger asChild>
             <Button onClick={openAddDialog}>
               <PlusCircle className="mr-2" /> Add New Promotion

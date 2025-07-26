@@ -41,6 +41,8 @@ export default function AdminContentPage() {
         title: 'Content Updated',
         description: 'The hero banner image has been updated successfully.',
       });
+      // This custom event will be picked up by other components
+      window.dispatchEvent(new Event('storage'));
     }
   };
 
@@ -56,7 +58,7 @@ export default function AdminContentPage() {
         title: 'Logo Updated',
         description: 'The site logo has been updated successfully.',
       });
-      // Optionally, force a reload to see header changes immediately, or handle with global state
+      // This custom event will be picked up by the Logo component
       window.dispatchEvent(new Event('storage'));
     }
   };

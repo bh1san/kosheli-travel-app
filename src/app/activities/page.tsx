@@ -27,16 +27,24 @@ export default function ActivitiesPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   useEffect(() => {
-    const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
-    const loadedActivities = savedActivities ? JSON.parse(savedActivities) : mockActivities;
-    setAllActivities(loadedActivities);
-    setFilteredActivities(loadedActivities);
-    
-    const uniqueCategories = Array.from(new Set(loadedActivities.map((act: Activity) => act.category)));
-    setCategories(uniqueCategories);
+    const loadActivities = () => {
+      const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
+      const loadedActivities = savedActivities ? JSON.parse(savedActivities) : mockActivities;
+      setAllActivities(loadedActivities);
+      
+      const uniqueCategories = Array.from(new Set(loadedActivities.map((act: Activity) => act.category)));
+      setCategories(uniqueCategories);
+    };
+
+    loadActivities();
+    window.addEventListener('storage', loadActivities);
+
+    return () => {
+      window.removeEventListener('storage', loadActivities);
+    };
   }, []);
 
-  const handleSearch = () => {
+  useEffect(() => {
     let activities = allActivities;
 
     if (searchTerm) {
@@ -52,12 +60,6 @@ export default function ActivitiesPage() {
     }
 
     setFilteredActivities(activities);
-  };
-  
-  useEffect(() => {
-    // This allows real-time filtering as you type or select
-    handleSearch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, selectedCategory, allActivities]);
 
 
@@ -98,7 +100,7 @@ export default function ActivitiesPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full md:w-auto font-body" aria-label="Search activities" onClick={handleSearch}>
+            <Button className="w-full md:w-auto font-body" aria-label="Search activities" onClick={() => { /* Trigger search manually if needed, though it's automatic */ }}>
               <Search size={18} className="mr-2" />
               Search
             </Button>

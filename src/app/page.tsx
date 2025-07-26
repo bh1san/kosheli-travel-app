@@ -28,27 +28,36 @@ export default function HomePage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
 
-
   useEffect(() => {
-    // Load Hero Image
-    const savedHeroUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
-    setHeroImageUrl(savedHeroUrl || DEFAULT_HERO_IMAGE);
+    const loadData = () => {
+      // Load Hero Image
+      const savedHeroUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
+      setHeroImageUrl(savedHeroUrl || DEFAULT_HERO_IMAGE);
 
-    // Load Promotions
-    const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
-    setPromotions(savedPromotions ? JSON.parse(savedPromotions) : mockPromotions);
+      // Load Promotions
+      const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
+      setPromotions(savedPromotions ? JSON.parse(savedPromotions) : mockPromotions);
+      
+      // Load Activities
+      const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
+      setActivities(savedActivities ? JSON.parse(savedActivities) : mockActivities);
+      
+      // Load Team Members
+      const savedTeam = localStorage.getItem(TEAM_STORAGE_KEY);
+      setTeamMembers(savedTeam ? JSON.parse(savedTeam) : mockTeamMembers);
+
+      // Load Flights (from mock for now)
+      setFlights(mockFlights);
+    };
+
+    loadData();
+
+    // Listen for changes from other tabs/windows, or our custom events
+    window.addEventListener('storage', loadData);
     
-    // Load Activities
-    const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
-    setActivities(savedActivities ? JSON.parse(savedActivities) : mockActivities);
-    
-    // Load Team Members
-    const savedTeam = localStorage.getItem(TEAM_STORAGE_KEY);
-    setTeamMembers(savedTeam ? JSON.parse(savedTeam) : mockTeamMembers);
-
-    // Load Flights (from mock for now)
-    setFlights(mockFlights);
-
+    return () => {
+      window.removeEventListener('storage', loadData);
+    };
   }, []);
 
   const featuredPromotions = promotions.slice(0, 3);

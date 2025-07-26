@@ -41,6 +41,7 @@ export default function AdminTeamPage() {
   const persistTeam = (updatedTeam: TeamMember[]) => {
     setTeamMembers(updatedTeam);
     localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(updatedTeam));
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -97,7 +98,7 @@ export default function AdminTeamPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold font-headline">Manage Team Members</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => {if(!isOpen) closeDialog()}}>
           <DialogTrigger asChild>
             <Button onClick={openAddDialog}>
               <PlusCircle className="mr-2" /> Add Team Member

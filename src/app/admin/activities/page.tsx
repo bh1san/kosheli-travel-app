@@ -41,6 +41,7 @@ export default function AdminActivitiesPage() {
   const persistActivities = (updatedActivities: Activity[]) => {
     setActivities(updatedActivities);
     localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(updatedActivities));
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -96,7 +97,7 @@ export default function AdminActivitiesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold font-headline">Manage Activities</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => { if(!isOpen) closeDialog()}}>
           <DialogTrigger asChild>
             <Button onClick={openAddDialog}>
               <PlusCircle className="mr-2" /> Add New Activity
