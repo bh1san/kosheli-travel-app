@@ -30,7 +30,7 @@ export default function HomePage() {
   const featuredPromotions = mockPromotions.slice(0, 3);
   const featuredActivities = mockActivities.slice(0, 3);
   const featuredFlights = mockFlights.slice(0,2);
-  const teamMembers = mockTeamMembers.slice(0, 3); // Show up to 3 team members
+  const teamMembers = mockTeamMembers.slice(0, 3);
 
   return (
     <MainLayout>
