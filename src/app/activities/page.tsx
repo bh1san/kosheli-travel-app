@@ -30,6 +30,7 @@ export default function ActivitiesPage() {
     const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
     const loadedActivities = savedActivities ? JSON.parse(savedActivities) : mockActivities;
     setAllActivities(loadedActivities);
+    setFilteredActivities(loadedActivities);
     
     const uniqueCategories = Array.from(new Set(loadedActivities.map((act: Activity) => act.category)));
     setCategories(uniqueCategories);
