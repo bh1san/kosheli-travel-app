@@ -26,6 +26,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
 
@@ -36,11 +37,7 @@ export default function AdminPromotionsPage() {
 
   useEffect(() => {
     const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
-    if (savedPromotions) {
-      setPromotions(JSON.parse(savedPromotions));
-    } else {
-      setPromotions(mockPromotions);
-    }
+    setPromotions(savedPromotions ? JSON.parse(savedPromotions) : mockPromotions);
   }, []);
 
   const persistPromotions = (updatedPromotions: Promotion[]) => {
@@ -51,7 +48,7 @@ export default function AdminPromotionsPage() {
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const promotionData: Omit<Promotion, 'id'> = {
+    const promotionData = {
       title: formData.get('title') as string,
       description: formData.get('description') as string,
       imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
@@ -62,7 +59,7 @@ export default function AdminPromotionsPage() {
     };
 
     if (editingPromotion) {
-      const updatedPromotions = promotions.map(p => p.id === editingPromotion.id ? { ...promotionData, id: p.id } : p);
+      const updatedPromotions = promotions.map(p => p.id === editingPromotion.id ? { ...editingPromotion, ...promotionData } : p);
       persistPromotions(updatedPromotions);
     } else {
       const newPromotion: Promotion = {
@@ -81,8 +78,10 @@ export default function AdminPromotionsPage() {
   };
 
   const handleDeletePromotion = (id: string) => {
-    const updatedPromotions = promotions.filter(p => p.id !== id);
-    persistPromotions(updatedPromotions);
+     if(confirm('Are you sure you want to delete this promotion?')) {
+        const updatedPromotions = promotions.filter(p => p.id !== id);
+        persistPromotions(updatedPromotions);
+     }
   };
   
   const closeDialog = () => {
@@ -95,7 +94,7 @@ export default function AdminPromotionsPage() {
     setIsDialogOpen(true);
   };
 
-  const formatDateForInput = (dateString: string) => {
+  const formatDateForInput = (dateString: string | undefined) => {
     if (!dateString) return '';
     return format(new Date(dateString), 'yyyy-MM-dd');
   };
@@ -104,7 +103,7 @@ export default function AdminPromotionsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold font-headline">Manage Promotions</h1>
-        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => { if (!isOpen) closeDialog(); else setIsDialogOpen(true); }}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openAddDialog}>
               <PlusCircle className="mr-2" /> Add New Promotion
@@ -121,7 +120,7 @@ export default function AdminPromotionsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div><Label htmlFor="discountPercentage">Discount %</Label><Input id="discountPercentage" name="discountPercentage" type="number" defaultValue={editingPromotion?.discountPercentage} /></div>
                 <div><Label htmlFor="discountCode">Discount Code</Label><Input id="discountCode" name="discountCode" defaultValue={editingPromotion?.discountCode} /></div>
-                <div><Label htmlFor="validUntil">Valid Until</Label><Input id="validUntil" name="validUntil" type="date" required defaultValue={editingPromotion ? formatDateForInput(editingPromotion.validUntil) : ''} /></div>
+                <div><Label htmlFor="validUntil">Valid Until</Label><Input id="validUntil" name="validUntil" type="date" required defaultValue={formatDateForInput(editingPromotion?.validUntil)} /></div>
                 <div>
                     <Label htmlFor="type">Type</Label>
                      <Select name="type" defaultValue={editingPromotion?.type || 'package'}>
@@ -156,8 +155,7 @@ export default function AdminPromotionsPage() {
             {promotions.map((promo) => (
               <TableRow key={promo.id}>
                 <TableCell>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={promo.imageUrl} alt={promo.title} width={80} height={50} className="rounded-md object-cover" key={promo.imageUrl}/>
+                  <Image src={promo.imageUrl} alt={promo.title} width={80} height={50} className="rounded-md object-cover" key={promo.imageUrl}/>
                 </TableCell>
                 <TableCell>{promo.title}</TableCell>
                 <TableCell>{promo.type}</TableCell>

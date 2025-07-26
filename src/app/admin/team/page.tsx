@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 
 const TEAM_STORAGE_KEY = 'adminTeam';
 
@@ -34,11 +35,7 @@ export default function AdminTeamPage() {
 
   useEffect(() => {
     const savedTeam = localStorage.getItem(TEAM_STORAGE_KEY);
-    if (savedTeam) {
-      setTeamMembers(JSON.parse(savedTeam));
-    } else {
-      setTeamMembers(mockTeamMembers);
-    }
+    setTeamMembers(savedTeam ? JSON.parse(savedTeam) : mockTeamMembers);
   }, []);
 
   const persistTeam = (updatedTeam: TeamMember[]) => {
@@ -49,7 +46,7 @@ export default function AdminTeamPage() {
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const memberData: Omit<TeamMember, 'id'> = {
+    const memberData = {
       name: formData.get('name') as string,
       role: formData.get('role') as string,
       bio: formData.get('bio') as string,
@@ -61,7 +58,7 @@ export default function AdminTeamPage() {
     };
 
     if (editingMember) {
-      const updatedTeam = teamMembers.map(m => m.id === editingMember.id ? { ...memberData, id: m.id } : m);
+      const updatedTeam = teamMembers.map(m => m.id === editingMember.id ? { ...editingMember, ...memberData } : m);
       persistTeam(updatedTeam);
     } else {
       const newMember: TeamMember = {
@@ -80,8 +77,10 @@ export default function AdminTeamPage() {
   };
 
   const handleDeleteMember = (id: string) => {
-    const updatedTeam = teamMembers.filter(m => m.id !== id);
-    persistTeam(updatedTeam);
+     if(confirm('Are you sure you want to delete this team member?')) {
+        const updatedTeam = teamMembers.filter(m => m.id !== id);
+        persistTeam(updatedTeam);
+     }
   };
   
   const closeDialog = () => {
@@ -98,7 +97,7 @@ export default function AdminTeamPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold font-headline">Manage Team Members</h1>
-        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => { if (!isOpen) closeDialog(); else setIsDialogOpen(true); }}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openAddDialog}>
               <PlusCircle className="mr-2" /> Add Team Member
@@ -135,8 +134,7 @@ export default function AdminTeamPage() {
             {teamMembers.map((member) => (
               <TableRow key={member.id}>
                 <TableCell>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={member.imageUrl} alt={member.name} width={60} height={60} className="rounded-full object-cover" key={member.imageUrl}/>
+                  <Image src={member.imageUrl} alt={member.name} width={60} height={60} className="rounded-full object-cover" key={member.imageUrl}/>
                 </TableCell>
                 <TableCell>{member.name}</TableCell>
                 <TableCell>{member.role}</TableCell>

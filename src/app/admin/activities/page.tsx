@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 
 const ACTIVITIES_STORAGE_KEY = 'adminActivities';
 
@@ -34,11 +35,7 @@ export default function AdminActivitiesPage() {
 
   useEffect(() => {
     const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
-    if (savedActivities) {
-      setActivities(JSON.parse(savedActivities));
-    } else {
-      setActivities(mockActivities);
-    }
+    setActivities(savedActivities ? JSON.parse(savedActivities) : mockActivities);
   }, []);
 
   const persistActivities = (updatedActivities: Activity[]) => {
@@ -49,7 +46,7 @@ export default function AdminActivitiesPage() {
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const activityData: Omit<Activity, 'id'> = {
+    const activityData = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
@@ -60,7 +57,7 @@ export default function AdminActivitiesPage() {
     };
 
     if (editingActivity) {
-      const updatedActivities = activities.map(a => a.id === editingActivity.id ? { ...activityData, id: a.id } : a);
+      const updatedActivities = activities.map(a => a.id === editingActivity.id ? { ...editingActivity, ...activityData } : a);
       persistActivities(updatedActivities);
     } else {
       const newActivity: Activity = {
@@ -79,8 +76,10 @@ export default function AdminActivitiesPage() {
   };
 
   const handleDeleteActivity = (id: string) => {
-    const updatedActivities = activities.filter(a => a.id !== id);
-    persistActivities(updatedActivities);
+    if(confirm('Are you sure you want to delete this activity?')) {
+      const updatedActivities = activities.filter(a => a.id !== id);
+      persistActivities(updatedActivities);
+    }
   };
   
   const closeDialog = () => {
@@ -97,7 +96,7 @@ export default function AdminActivitiesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold font-headline">Manage Activities</h1>
-        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => { if (!isOpen) closeDialog(); else setIsDialogOpen(true); }}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openAddDialog}>
               <PlusCircle className="mr-2" /> Add New Activity
@@ -138,8 +137,7 @@ export default function AdminActivitiesPage() {
             {activities.map((activity) => (
               <TableRow key={activity.id}>
                 <TableCell>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={activity.imageUrl} alt={activity.name} width={80} height={50} className="rounded-md object-cover" key={activity.imageUrl}/>
+                  <Image src={activity.imageUrl} alt={activity.name} width={80} height={50} className="rounded-md object-cover" key={activity.imageUrl}/>
                 </TableCell>
                 <TableCell>{activity.name}</TableCell>
                 <TableCell>{activity.category}</TableCell>
