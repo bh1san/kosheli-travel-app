@@ -1,13 +1,16 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Calendar, PlaneTakeoff, PlaneLanding } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Search, Calendar, PlaneTakeoff, PlaneLanding, Check } from "lucide-react";
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { mockFlights } from '@/lib/mockData';
 
 interface FlightSearchFormProps {
   onSearch?: (params: { departure: string; destination: string; date: string }) => void;
@@ -15,11 +18,31 @@ interface FlightSearchFormProps {
   initialState?: { departure: string; destination: string; date: string };
 }
 
+type Airport = { value: string; label: string };
+
 export function FlightSearchForm({ onSearch, className, initialState }: FlightSearchFormProps) {
   const router = useRouter();
   const [departure, setDeparture] = useState(initialState?.departure || '');
   const [destination, setDestination] = useState(initialState?.destination || '');
   const [date, setDate] = useState(initialState?.date || '');
+
+  const [departureOpen, setDepartureOpen] = useState(false);
+  const [destinationOpen, setDestinationOpen] = useState(false);
+
+  const airports = useMemo(() => {
+    const allAirports = new Map<string, string>();
+    mockFlights.forEach(flight => {
+      const departureLabel = `${flight.departureCity} (${flight.departureAirportCode})`;
+      if (!allAirports.has(flight.departureAirportCode)) {
+        allAirports.set(flight.departureAirportCode, departureLabel);
+      }
+      const arrivalLabel = `${flight.arrivalCity} (${flight.arrivalAirportCode})`;
+      if (!allAirports.has(flight.arrivalAirportCode)) {
+        allAirports.set(flight.arrivalAirportCode, arrivalLabel);
+      }
+    });
+    return Array.from(allAirports, ([code, label]) => ({ value: label, label: label }));
+  }, []);
 
   const handleSearch = () => {
     if (onSearch) {
@@ -34,6 +57,62 @@ export function FlightSearchForm({ onSearch, className, initialState }: FlightSe
     }
   };
 
+  const AirportSelector = ({
+    value,
+    onSelect,
+    open,
+    setOpen,
+    placeholder,
+  }: {
+    value: string;
+    onSelect: (value: string) => void;
+    open: boolean;
+    setOpen: (open: boolean) => void;
+    placeholder: string;
+  }) => (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+        >
+          {value ? airports.find(a => a.value.toLowerCase() === value.toLowerCase())?.label : placeholder}
+          <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[300px] p-0">
+        <Command>
+          <CommandInput placeholder="Search airport..." />
+          <CommandList>
+            <CommandEmpty>No airport found.</CommandEmpty>
+            <CommandGroup>
+              {airports.map((airport) => (
+                <CommandItem
+                  key={airport.value}
+                  value={airport.value}
+                  onSelect={(currentValue) => {
+                    onSelect(currentValue === value ? "" : currentValue);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === airport.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {airport.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+
   return (
     <Card className={cn("shadow-lg", className)}>
       <CardContent className="p-4 md:p-6">
@@ -42,26 +121,24 @@ export function FlightSearchForm({ onSearch, className, initialState }: FlightSe
             <label htmlFor="departure-home" className="flex items-center text-sm font-medium text-foreground mb-1">
               <PlaneTakeoff size={16} className="mr-2 text-primary" /> From
             </label>
-            <Input 
-              type="text" 
-              id="departure-home" 
-              placeholder="e.g., New York (JFK)" 
-              className="font-body"
+            <AirportSelector
               value={departure}
-              onChange={(e) => setDeparture(e.target.value)}
+              onSelect={setDeparture}
+              open={departureOpen}
+              setOpen={setDepartureOpen}
+              placeholder="Select departure airport"
             />
           </div>
           <div className="space-y-1">
             <label htmlFor="destination-home" className="flex items-center text-sm font-medium text-foreground mb-1">
               <PlaneLanding size={16} className="mr-2 text-primary" /> To
             </label>
-            <Input 
-              type="text" 
-              id="destination-home" 
-              placeholder="e.g., Dubai (DXB)" 
-              className="font-body"
+            <AirportSelector
               value={destination}
-              onChange={(e) => setDestination(e.target.value)}
+              onSelect={setDestination}
+              open={destinationOpen}
+              setOpen={setDestinationOpen}
+              placeholder="Select destination airport"
             />
           </div>
           <div className="space-y-1">

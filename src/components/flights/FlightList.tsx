@@ -20,18 +20,16 @@ export function FlightList({ departureQuery = '', destinationQuery = '', dateQue
     
     const departure = departureQuery.toLowerCase().trim();
     if (departure) {
-      tempFlights = tempFlights.filter(flight =>
-        (flight.departureCity?.toLowerCase().includes(departure)) ||
-        (flight.departureAirportCode?.toLowerCase().includes(departure))
-      );
+        tempFlights = tempFlights.filter(flight =>
+            `${flight.departureCity} (${flight.departureAirportCode})`.toLowerCase().includes(departure)
+        );
     }
 
     const destination = destinationQuery.toLowerCase().trim();
     if (destination) {
-      tempFlights = tempFlights.filter(flight =>
-        (flight.arrivalCity?.toLowerCase().includes(destination)) ||
-        (flight.arrivalAirportCode?.toLowerCase().includes(destination))
-      );
+        tempFlights = tempFlights.filter(flight =>
+            `${flight.arrivalCity} (${flight.arrivalAirportCode})`.toLowerCase().includes(destination)
+        );
     }
 
     if (dateQuery) {
