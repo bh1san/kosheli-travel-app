@@ -1,4 +1,7 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -11,7 +14,19 @@ import { Plane, MapPin, Sparkles } from 'lucide-react';
 import { FlightSearchForm } from '@/components/flights/FlightSearchForm';
 import { TeamMemberCard } from '@/components/team/TeamMemberCard';
 
+const HERO_IMAGE_STORAGE_KEY = 'heroImageUrl';
+const DEFAULT_HERO_IMAGE = 'https://placehold.co/1200x800.png';
+
 export default function HomePage() {
+  const [heroImageUrl, setHeroImageUrl] = useState(DEFAULT_HERO_IMAGE);
+
+  useEffect(() => {
+    const savedUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
+    if (savedUrl) {
+      setHeroImageUrl(savedUrl);
+    }
+  }, []);
+
   const featuredPromotions = mockPromotions.slice(0, 3);
   const featuredActivities = mockActivities.slice(0, 3);
   const featuredFlights = mockFlights.slice(0,2);
@@ -23,12 +38,13 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="relative h-[calc(100vh-15rem)] min-h-[400px] md:h-[calc(100vh-20rem)] rounded-xl overflow-hidden shadow-2xl">
           <Image 
-            src="https://placehold.co/1200x800.png" 
+            src={heroImageUrl} 
             alt="Beautiful view of Dubai"
             layout="fill"
             objectFit="cover"
             priority
             data-ai-hint="dubai cityscape"
+            key={heroImageUrl}
           />
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-white drop-shadow-lg">
