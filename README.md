@@ -13,9 +13,39 @@ npm run dev
 
 The application will be available at `http://localhost:9002`.
 
+## Creating Restore Points (Snapshots)
+
+Using version control is the best way to create restore points. This allows you to save the current state of your project and revert back to it if you ever run into issues with future changes. You can do this from your command line terminal.
+
+### 1. Check the Status
+
+See all the files that have been changed since your last restore point.
+
+```bash
+git status
+```
+
+### 2. Add All Changes
+
+Tell git you want to include all the current changes in your snapshot.
+
+```bash
+git add .
+```
+
+### 3. Save the Snapshot (Commit)
+
+Save the snapshot with a descriptive message. This is your restore point.
+
+```bash
+git commit -m "Project is stable, all features working."
+```
+
+Now your project is saved at this stable point. If you ever need to revert, you can use the `git log` and `git checkout` commands.
+
 ## Connecting to GitHub
 
-To connect this project to a GitHub repository and upload your code, follow these steps from your command line terminal.
+To connect this project to a GitHub repository and upload your code for safekeeping, follow these steps from your command line terminal.
 
 ### 1. Initialize Git
 
