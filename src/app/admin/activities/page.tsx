@@ -29,12 +29,12 @@ import Image from 'next/image';
 export default function AdminActivitiesPage() {
   const [activities, setActivities] = useState<Activity[]>(mockActivities);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
 
-  const handleAddActivity = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const newActivity: Activity = {
-      id: `ACT${Math.floor(Math.random() * 1000)}`,
+    const activityData: Omit<Activity, 'id'> = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
@@ -43,40 +43,66 @@ export default function AdminActivitiesPage() {
       rating: Number(formData.get('rating')),
       category: formData.get('category') as string,
     };
-    setActivities([...activities, newActivity]);
-    setIsDialogOpen(false);
+
+    if (editingActivity) {
+      // Update existing activity
+      setActivities(activities.map(a => a.id === editingActivity.id ? { ...activityData, id: a.id } : a));
+    } else {
+      // Add new activity
+      const newActivity: Activity = {
+        ...activityData,
+        id: `ACT${Math.floor(Math.random() * 1000)}`,
+      };
+      setActivities([...activities, newActivity]);
+    }
+
+    closeDialog();
+  };
+  
+  const handleEditClick = (activity: Activity) => {
+    setEditingActivity(activity);
+    setIsDialogOpen(true);
   };
 
   const handleDeleteActivity = (id: string) => {
     setActivities(activities.filter(a => a.id !== id));
   };
-
+  
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setEditingActivity(null);
+  };
+  
+  const openAddDialog = () => {
+    setEditingActivity(null);
+    setIsDialogOpen(true);
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold font-headline">Manage Activities</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => { if (!isOpen) closeDialog(); else setIsDialogOpen(true); }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={openAddDialog}>
               <PlusCircle className="mr-2" /> Add New Activity
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add a New Activity</DialogTitle>
+              <DialogTitle>{editingActivity ? 'Edit Activity' : 'Add a New Activity'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddActivity} className="space-y-4">
-              <div><Label htmlFor="name">Name</Label><Input id="name" name="name" required /></div>
-              <div><Label htmlFor="description">Description</Label><Textarea id="description" name="description" required /></div>
-              <div><Label htmlFor="imageUrl">Image URL</Label><Input id="imageUrl" name="imageUrl" placeholder="https://placehold.co/600x400.png" /></div>
+            <form onSubmit={handleFormSubmit} className="space-y-4">
+              <div><Label htmlFor="name">Name</Label><Input id="name" name="name" required defaultValue={editingActivity?.name} /></div>
+              <div><Label htmlFor="description">Description</Label><Textarea id="description" name="description" required defaultValue={editingActivity?.description} /></div>
+              <div><Label htmlFor="imageUrl">Image URL</Label><Input id="imageUrl" name="imageUrl" placeholder="https://placehold.co/600x400.png" defaultValue={editingActivity?.imageUrl} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label htmlFor="price">Price (AED)</Label><Input id="price" name="price" type="number" required /></div>
-                <div><Label htmlFor="location">Location</Label><Input id="location" name="location" required /></div>
-                <div><Label htmlFor="rating">Rating (1-5)</Label><Input id="rating" name="rating" type="number" step="0.1" min="1" max="5" required /></div>
-                <div><Label htmlFor="category">Category</Label><Input id="category" name="category" required /></div>
+                <div><Label htmlFor="price">Price (AED)</Label><Input id="price" name="price" type="number" required defaultValue={editingActivity?.price} /></div>
+                <div><Label htmlFor="location">Location</Label><Input id="location" name="location" required defaultValue={editingActivity?.location} /></div>
+                <div><Label htmlFor="rating">Rating (1-5)</Label><Input id="rating" name="rating" type="number" step="0.1" min="1" max="5" required defaultValue={editingActivity?.rating} /></div>
+                <div><Label htmlFor="category">Category</Label><Input id="category" name="category" required defaultValue={editingActivity?.category} /></div>
               </div>
-              <Button type="submit" className="w-full">Add Activity</Button>
+              <Button type="submit" className="w-full">{editingActivity ? 'Save Changes' : 'Add Activity'}</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -103,7 +129,7 @@ export default function AdminActivitiesPage() {
                 <TableCell>{activity.category}</TableCell>
                 <TableCell>{activity.price.toFixed(2)} AED</TableCell>
                 <TableCell className="space-x-2">
-                   <Button variant="outline" size="icon" disabled><Edit size={16} /></Button>
+                   <Button variant="outline" size="icon" onClick={() => handleEditClick(activity)}><Edit size={16} /></Button>
                    <Button variant="destructive" size="icon" onClick={() => handleDeleteActivity(activity.id)}><Trash2 size={16} /></Button>
                 </TableCell>
               </TableRow>

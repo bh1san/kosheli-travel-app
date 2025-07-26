@@ -25,59 +25,88 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format } from 'date-fns';
 
 export default function AdminPromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>(mockPromotions);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [promotionType, setPromotionType] = useState<'flight' | 'activity' | 'package'>('package');
+  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
 
-  const handleAddPromotion = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const newPromotion: Promotion = {
-      id: `PROMO${Math.floor(Math.random() * 1000)}`,
+    const promotionData: Omit<Promotion, 'id'> = {
       title: formData.get('title') as string,
       description: formData.get('description') as string,
       imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
       discountPercentage: Number(formData.get('discountPercentage')),
       discountCode: formData.get('discountCode') as string,
       validUntil: new Date(formData.get('validUntil') as string).toISOString(),
-      type: promotionType,
+      type: formData.get('type') as 'flight' | 'activity' | 'package',
     };
-    setPromotions([...promotions, newPromotion]);
-    setIsDialogOpen(false);
+
+    if (editingPromotion) {
+      setPromotions(promotions.map(p => p.id === editingPromotion.id ? { ...promotionData, id: p.id } : p));
+    } else {
+      const newPromotion: Promotion = {
+        id: `PROMO${Math.floor(Math.random() * 1000)}`,
+        ...promotionData,
+      };
+      setPromotions([...promotions, newPromotion]);
+    }
+    
+    closeDialog();
+  };
+
+  const handleEditClick = (promotion: Promotion) => {
+    setEditingPromotion(promotion);
+    setIsDialogOpen(true);
   };
 
   const handleDeletePromotion = (id: string) => {
     setPromotions(promotions.filter(p => p.id !== id));
   };
+  
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setEditingPromotion(null);
+  };
 
+  const openAddDialog = () => {
+    setEditingPromotion(null);
+    setIsDialogOpen(true);
+  };
+
+  const formatDateForInput = (dateString: string) => {
+    if (!dateString) return '';
+    return format(new Date(dateString), 'yyyy-MM-dd');
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold font-headline">Manage Promotions</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => { if (!isOpen) closeDialog(); else setIsDialogOpen(true); }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={openAddDialog}>
               <PlusCircle className="mr-2" /> Add New Promotion
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add a New Promotion</DialogTitle>
+              <DialogTitle>{editingPromotion ? 'Edit Promotion' : 'Add a New Promotion'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddPromotion} className="space-y-4">
-              <div><Label htmlFor="title">Title</Label><Input id="title" name="title" required /></div>
-              <div><Label htmlFor="description">Description</Label><Textarea id="description" name="description" required /></div>
-              <div><Label htmlFor="imageUrl">Image URL</Label><Input id="imageUrl" name="imageUrl" placeholder="https://placehold.co/600x400.png" /></div>
+            <form onSubmit={handleFormSubmit} className="space-y-4">
+              <div><Label htmlFor="title">Title</Label><Input id="title" name="title" required defaultValue={editingPromotion?.title}/></div>
+              <div><Label htmlFor="description">Description</Label><Textarea id="description" name="description" required defaultValue={editingPromotion?.description} /></div>
+              <div><Label htmlFor="imageUrl">Image URL</Label><Input id="imageUrl" name="imageUrl" placeholder="https://placehold.co/600x400.png" defaultValue={editingPromotion?.imageUrl} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label htmlFor="discountPercentage">Discount %</Label><Input id="discountPercentage" name="discountPercentage" type="number" /></div>
-                <div><Label htmlFor="discountCode">Discount Code</Label><Input id="discountCode" name="discountCode" /></div>
-                <div><Label htmlFor="validUntil">Valid Until</Label><Input id="validUntil" name="validUntil" type="date" required /></div>
+                <div><Label htmlFor="discountPercentage">Discount %</Label><Input id="discountPercentage" name="discountPercentage" type="number" defaultValue={editingPromotion?.discountPercentage} /></div>
+                <div><Label htmlFor="discountCode">Discount Code</Label><Input id="discountCode" name="discountCode" defaultValue={editingPromotion?.discountCode} /></div>
+                <div><Label htmlFor="validUntil">Valid Until</Label><Input id="validUntil" name="validUntil" type="date" required defaultValue={editingPromotion ? formatDateForInput(editingPromotion.validUntil) : ''} /></div>
                 <div>
                     <Label htmlFor="type">Type</Label>
-                    <Select onValueChange={(value) => setPromotionType(value as any)} defaultValue={promotionType}>
+                     <Select name="type" defaultValue={editingPromotion?.type || 'package'}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="flight">Flight</SelectItem>
@@ -87,7 +116,7 @@ export default function AdminPromotionsPage() {
                     </Select>
                 </div>
               </div>
-              <Button type="submit" className="w-full">Add Promotion</Button>
+              <Button type="submit" className="w-full">{editingPromotion ? 'Save Changes' : 'Add Promotion'}</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -112,7 +141,7 @@ export default function AdminPromotionsPage() {
                 <TableCell>{promo.discountPercentage ? `${promo.discountPercentage}%` : 'N/A'}</TableCell>
                 <TableCell>{new Date(promo.validUntil).toLocaleDateString()}</TableCell>
                 <TableCell className="space-x-2">
-                   <Button variant="outline" size="icon" disabled><Edit size={16} /></Button>
+                   <Button variant="outline" size="icon" onClick={() => handleEditClick(promo)}><Edit size={16} /></Button>
                    <Button variant="destructive" size="icon" onClick={() => handleDeletePromotion(promo.id)}><Trash2 size={16} /></Button>
                 </TableCell>
               </TableRow>
