@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { mockPromotions, mockActivities, mockFlights, mockTeamMembers } from '@/lib/mockData';
+import type { Promotion, Activity, Flight, TeamMember } from '@/types';
 import { PromotionList } from '@/components/promotions/PromotionList';
 import { ActivityCard } from '@/components/activities/ActivityCard';
 import { FlightCard } from '@/components/flights/FlightCard';
@@ -15,35 +16,56 @@ import { FlightSearchForm } from '@/components/flights/FlightSearchForm';
 import { TeamMemberCard } from '@/components/team/TeamMemberCard';
 
 const HERO_IMAGE_STORAGE_KEY = 'heroImageUrl';
+const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
+const ACTIVITIES_STORAGE_KEY = 'adminActivities';
+const TEAM_STORAGE_KEY = 'adminTeam';
 const DEFAULT_HERO_IMAGE = 'https://placehold.co/1200x800.png';
 
 export default function HomePage() {
   const [heroImageUrl, setHeroImageUrl] = useState(DEFAULT_HERO_IMAGE);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [flights, setFlights] = useState<Flight[]>([]);
+
 
   useEffect(() => {
-    const savedUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
-    if (savedUrl) {
-      setHeroImageUrl(savedUrl);
+    // Load Hero Image
+    const savedHeroUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
+    if (savedHeroUrl) {
+      setHeroImageUrl(savedHeroUrl);
     }
+
+    // Load Promotions
+    const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
+    setPromotions(savedPromotions ? JSON.parse(savedPromotions) : mockPromotions);
+    
+    // Load Activities
+    const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
+    setActivities(savedActivities ? JSON.parse(savedActivities) : mockActivities);
+    
+    // Load Team Members
+    const savedTeam = localStorage.getItem(TEAM_STORAGE_KEY);
+    setTeamMembers(savedTeam ? JSON.parse(savedTeam) : mockTeamMembers);
+
+    // Load Flights (from mock for now)
+    setFlights(mockFlights);
+
   }, []);
 
-  const featuredPromotions = mockPromotions.slice(0, 3);
-  const featuredActivities = mockActivities.slice(0, 3);
+  const featuredPromotions = promotions.slice(0, 3);
+  const featuredActivities = activities.slice(0, 3);
+  const featuredTeamMembers = teamMembers.slice(0, 3);
   
   // Find the cheapest flight from Dubai to Nepal (Kathmandu)
-  const flightsToNepal = mockFlights.filter(
+  const cheapestFlightToNepal = flights.filter(
     (flight) =>
       flight.departureAirportCode === 'DXB' &&
       flight.arrivalAirportCode === 'KTM'
+  ).reduce((cheapest, current) => 
+    (cheapest === null || current.price < cheapest.price) ? current : cheapest, 
+    null as Flight | null
   );
-  
-  const cheapestFlightToNepal = flightsToNepal.length > 0 
-    ? flightsToNepal.reduce((cheapest, current) => 
-        current.price < cheapest.price ? current : cheapest
-      ) 
-    : null;
-
-  const teamMembers = mockTeamMembers.slice(0, 3);
 
   return (
     <MainLayout>
@@ -130,7 +152,7 @@ export default function HomePage() {
         <section className="py-8">
           <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Meet Our Team</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {teamMembers.map(member => (
+            {featuredTeamMembers.map(member => (
               <TeamMemberCard key={member.id} member={member} />
             ))}
           </div>

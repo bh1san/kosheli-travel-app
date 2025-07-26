@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { mockPromotions } from '@/lib/mockData';
 import type { Promotion } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -27,10 +27,26 @@ import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 
+const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
+
 export default function AdminPromotionsPage() {
-  const [promotions, setPromotions] = useState<Promotion[]>(mockPromotions);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
+
+  useEffect(() => {
+    const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
+    if (savedPromotions) {
+      setPromotions(JSON.parse(savedPromotions));
+    } else {
+      setPromotions(mockPromotions);
+    }
+  }, []);
+
+  const persistPromotions = (updatedPromotions: Promotion[]) => {
+    setPromotions(updatedPromotions);
+    localStorage.setItem(PROMOTIONS_STORAGE_KEY, JSON.stringify(updatedPromotions));
+  };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -46,13 +62,14 @@ export default function AdminPromotionsPage() {
     };
 
     if (editingPromotion) {
-      setPromotions(promotions.map(p => p.id === editingPromotion.id ? { ...promotionData, id: p.id } : p));
+      const updatedPromotions = promotions.map(p => p.id === editingPromotion.id ? { ...promotionData, id: p.id } : p);
+      persistPromotions(updatedPromotions);
     } else {
       const newPromotion: Promotion = {
         id: `PROMO${Math.floor(Math.random() * 1000)}`,
         ...promotionData,
       };
-      setPromotions([...promotions, newPromotion]);
+      persistPromotions([...promotions, newPromotion]);
     }
     
     closeDialog();
@@ -64,7 +81,8 @@ export default function AdminPromotionsPage() {
   };
 
   const handleDeletePromotion = (id: string) => {
-    setPromotions(promotions.filter(p => p.id !== id));
+    const updatedPromotions = promotions.filter(p => p.id !== id);
+    persistPromotions(updatedPromotions);
   };
   
   const closeDialog = () => {

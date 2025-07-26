@@ -1,9 +1,25 @@
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import type { Promotion } from '@/types';
 import { PromotionList } from '@/components/promotions/PromotionList';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { mockPromotions } from '@/lib/mockData';
 
+const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
+
 export default function PromotionsPage() {
-  const promotions = mockPromotions;
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+
+  useEffect(() => {
+    const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
+    if (savedPromotions) {
+      setPromotions(JSON.parse(savedPromotions));
+    } else {
+      setPromotions(mockPromotions);
+    }
+  }, []);
 
   return (
     <MainLayout>

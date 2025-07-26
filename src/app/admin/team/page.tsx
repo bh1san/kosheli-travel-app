@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { mockTeamMembers } from '@/lib/mockData';
 import type { TeamMember } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -26,10 +26,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 
+const TEAM_STORAGE_KEY = 'adminTeam';
+
 export default function AdminTeamPage() {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(mockTeamMembers);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+
+  useEffect(() => {
+    const savedTeam = localStorage.getItem(TEAM_STORAGE_KEY);
+    if (savedTeam) {
+      setTeamMembers(JSON.parse(savedTeam));
+    } else {
+      setTeamMembers(mockTeamMembers);
+    }
+  }, []);
+
+  const persistTeam = (updatedTeam: TeamMember[]) => {
+    setTeamMembers(updatedTeam);
+    localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(updatedTeam));
+  };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -46,13 +62,14 @@ export default function AdminTeamPage() {
     };
 
     if (editingMember) {
-      setTeamMembers(teamMembers.map(m => m.id === editingMember.id ? { ...memberData, id: m.id } : m));
+      const updatedTeam = teamMembers.map(m => m.id === editingMember.id ? { ...memberData, id: m.id } : m);
+      persistTeam(updatedTeam);
     } else {
       const newMember: TeamMember = {
         id: `TM${Math.floor(Math.random() * 1000)}`,
         ...memberData,
       };
-      setTeamMembers([...teamMembers, newMember]);
+      persistTeam([...teamMembers, newMember]);
     }
 
     closeDialog();
@@ -64,7 +81,8 @@ export default function AdminTeamPage() {
   };
 
   const handleDeleteMember = (id: string) => {
-    setTeamMembers(teamMembers.filter(m => m.id !== id));
+    const updatedTeam = teamMembers.filter(m => m.id !== id);
+    persistTeam(updatedTeam);
   };
   
   const closeDialog = () => {
@@ -118,7 +136,7 @@ export default function AdminTeamPage() {
             {teamMembers.map((member) => (
               <TableRow key={member.id}>
                 <TableCell>
-                  <Image src={member.imageUrl} alt={member.name} width={60} height={60} className="rounded-full object-cover"/>
+                  <Image src={member.imageUrl} alt={member.name} width={60} height={60} className="rounded-full object-cover" key={member.imageUrl}/>
                 </TableCell>
                 <TableCell>{member.name}</TableCell>
                 <TableCell>{member.role}</TableCell>

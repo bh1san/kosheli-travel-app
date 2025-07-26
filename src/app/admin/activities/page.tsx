@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { mockActivities } from '@/lib/mockData';
 import type { Activity } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -26,10 +26,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 
+const ACTIVITIES_STORAGE_KEY = 'adminActivities';
+
 export default function AdminActivitiesPage() {
-  const [activities, setActivities] = useState<Activity[]>(mockActivities);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+
+  useEffect(() => {
+    const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
+    if (savedActivities) {
+      setActivities(JSON.parse(savedActivities));
+    } else {
+      setActivities(mockActivities);
+    }
+  }, []);
+
+  const persistActivities = (updatedActivities: Activity[]) => {
+    setActivities(updatedActivities);
+    localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(updatedActivities));
+  };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,15 +61,14 @@ export default function AdminActivitiesPage() {
     };
 
     if (editingActivity) {
-      // Update existing activity
-      setActivities(activities.map(a => a.id === editingActivity.id ? { ...activityData, id: a.id } : a));
+      const updatedActivities = activities.map(a => a.id === editingActivity.id ? { ...activityData, id: a.id } : a);
+      persistActivities(updatedActivities);
     } else {
-      // Add new activity
       const newActivity: Activity = {
         ...activityData,
         id: `ACT${Math.floor(Math.random() * 1000)}`,
       };
-      setActivities([...activities, newActivity]);
+      persistActivities([...activities, newActivity]);
     }
 
     closeDialog();
@@ -65,7 +80,8 @@ export default function AdminActivitiesPage() {
   };
 
   const handleDeleteActivity = (id: string) => {
-    setActivities(activities.filter(a => a.id !== id));
+    const updatedActivities = activities.filter(a => a.id !== id);
+    persistActivities(updatedActivities);
   };
   
   const closeDialog = () => {
@@ -123,7 +139,7 @@ export default function AdminActivitiesPage() {
             {activities.map((activity) => (
               <TableRow key={activity.id}>
                 <TableCell>
-                  <Image src={activity.imageUrl} alt={activity.name} width={80} height={50} className="rounded-md object-cover"/>
+                  <Image src={activity.imageUrl} alt={activity.name} width={80} height={50} className="rounded-md object-cover" key={activity.imageUrl}/>
                 </TableCell>
                 <TableCell>{activity.name}</TableCell>
                 <TableCell>{activity.category}</TableCell>
