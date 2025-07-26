@@ -13,7 +13,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut, Users, Image as ImageIcon, Users2 } from 'lucide-react';
+import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut, Users, Image as ImageIcon, Users2, FileText } from 'lucide-react';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: <LayoutDashboard /> },
