@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import type { Promotion } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -30,6 +31,7 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
           height={300}
           className="w-full h-48 object-cover"
           data-ai-hint={promotion.dataAiHint || 'travel promotion'}
+          key={promotion.imageUrl}
         />
         {promotion.discountPercentage && (
           <Badge variant="destructive" className="absolute top-2 left-2 text-base px-2 py-1">

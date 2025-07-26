@@ -27,6 +27,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
           height={400}
           className="w-full h-48 object-cover"
           data-ai-hint={activity.dataAiHint || 'dubai activity'}
+          key={activity.imageUrl}
         />
          <div className="absolute top-2 right-2">
           <Badge variant="secondary" className="bg-black/50 text-white backdrop-blur-sm">

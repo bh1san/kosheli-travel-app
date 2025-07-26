@@ -66,7 +66,7 @@ export default function AdminTeamPage() {
       persistTeam(updatedTeam);
     } else {
       const newMember: TeamMember = {
-        id: `TM${Math.floor(Math.random() * 1000)}`,
+        id: `TM${Date.now()}`,
         ...memberData,
       };
       persistTeam([...teamMembers, newMember]);

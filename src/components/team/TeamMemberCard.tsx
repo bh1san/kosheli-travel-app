@@ -24,6 +24,7 @@ export function TeamMemberCard({ member }: TeamMemberCardProps) {
             height={128}
             className="rounded-full object-cover border-4 border-primary/20"
             data-ai-hint="person portrait"
+            key={member.imageUrl}
           />
         </div>
       </CardHeader>

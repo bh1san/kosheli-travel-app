@@ -14,11 +14,7 @@ export default function PromotionsPage() {
 
   useEffect(() => {
     const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
-    if (savedPromotions) {
-      setPromotions(JSON.parse(savedPromotions));
-    } else {
-      setPromotions(mockPromotions);
-    }
+    setPromotions(savedPromotions ? JSON.parse(savedPromotions) : mockPromotions);
   }, []);
 
   return (

@@ -26,6 +26,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
 
@@ -66,7 +67,7 @@ export default function AdminPromotionsPage() {
       persistPromotions(updatedPromotions);
     } else {
       const newPromotion: Promotion = {
-        id: `PROMO${Math.floor(Math.random() * 1000)}`,
+        id: `PROMO${Date.now()}`,
         ...promotionData,
       };
       persistPromotions([...promotions, newPromotion]);
@@ -144,6 +145,7 @@ export default function AdminPromotionsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Image</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Discount</TableHead>
@@ -154,6 +156,9 @@ export default function AdminPromotionsPage() {
           <TableBody>
             {promotions.map((promo) => (
               <TableRow key={promo.id}>
+                <TableCell>
+                  <Image src={promo.imageUrl} alt={promo.title} width={80} height={50} className="rounded-md object-cover" key={promo.imageUrl}/>
+                </TableCell>
                 <TableCell>{promo.title}</TableCell>
                 <TableCell>{promo.type}</TableCell>
                 <TableCell>{promo.discountPercentage ? `${promo.discountPercentage}%` : 'N/A'}</TableCell>

@@ -66,7 +66,7 @@ export default function AdminActivitiesPage() {
     } else {
       const newActivity: Activity = {
         ...activityData,
-        id: `ACT${Math.floor(Math.random() * 1000)}`,
+        id: `ACT${Date.now()}`,
       };
       persistActivities([...activities, newActivity]);
     }

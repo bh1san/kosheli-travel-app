@@ -32,9 +32,7 @@ export default function HomePage() {
   useEffect(() => {
     // Load Hero Image
     const savedHeroUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
-    if (savedHeroUrl) {
-      setHeroImageUrl(savedHeroUrl);
-    }
+    setHeroImageUrl(savedHeroUrl || DEFAULT_HERO_IMAGE);
 
     // Load Promotions
     const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
