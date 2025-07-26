@@ -10,15 +10,22 @@ import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
 const HERO_IMAGE_STORAGE_KEY = 'heroImageUrl';
+const LOGO_IMAGE_STORAGE_KEY = 'logoImageUrl';
+const DEFAULT_LOGO_IMAGE = '/images/logo.png';
 
 export default function AdminContentPage() {
   const [heroImageUrl, setHeroImageUrl] = useState('https://placehold.co/1200x800.png');
+  const [logoUrl, setLogoUrl] = useState(DEFAULT_LOGO_IMAGE);
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
-    if (savedUrl) {
-      setHeroImageUrl(savedUrl);
+    const savedHeroUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
+    if (savedHeroUrl) {
+      setHeroImageUrl(savedHeroUrl);
+    }
+    const savedLogoUrl = localStorage.getItem(LOGO_IMAGE_STORAGE_KEY);
+    if (savedLogoUrl) {
+      setLogoUrl(savedLogoUrl);
     }
   }, []);
 
@@ -36,6 +43,24 @@ export default function AdminContentPage() {
       });
     }
   };
+
+  const handleUpdateLogo = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const newUrl = formData.get('logoImageUrl') as string;
+    
+    if (newUrl) {
+      setLogoUrl(newUrl);
+      localStorage.setItem(LOGO_IMAGE_STORAGE_KEY, newUrl);
+      toast({
+        title: 'Logo Updated',
+        description: 'The site logo has been updated successfully.',
+      });
+      // Optionally, force a reload to see header changes immediately, or handle with global state
+      window.dispatchEvent(new Event('storage'));
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -63,16 +88,28 @@ export default function AdminContentPage() {
         </CardContent>
       </Card>
 
-      {/* Placeholder for other content management, e.g., activity/promotion images */}
       <Card>
         <CardHeader>
-          <CardTitle>Other Images</CardTitle>
-          <CardDescription>Management for other images can be added here.</CardDescription>
+          <CardTitle>Site Logo</CardTitle>
+          <CardDescription>Update the main logo used in the site header. Paste an image URL below.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">This section is a placeholder for future functionality.</p>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Current Logo Preview:</Label>
+            <div className="mt-2 rounded-lg border p-4 bg-muted/30 max-w-sm">
+              <Image src={logoUrl} alt="Logo Preview" width={180} height={50} key={logoUrl} />
+            </div>
+          </div>
+          <form onSubmit={handleUpdateLogo} className="space-y-2">
+            <Label htmlFor="logoImageUrl">New Logo URL</Label>
+            <div className="flex gap-2">
+              <Input id="logoImageUrl" name="logoImageUrl" type="url" placeholder="https://..." required defaultValue={logoUrl} />
+              <Button type="submit">Update Logo</Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
+
     </div>
   );
 }
