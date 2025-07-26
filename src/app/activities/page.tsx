@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import type { Activity } from '@/types';
 import { ActivityList } from '@/components/activities/ActivityList';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { mockActivities } from '@/lib/mockData';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -16,8 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const ACTIVITIES_STORAGE_KEY = 'adminActivities';
+import { getData } from '@/services/firestore';
 
 export default function ActivitiesPage() {
   const [allActivities, setAllActivities] = useState<Activity[]>([]);
@@ -25,23 +23,19 @@ export default function ActivitiesPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadActivities = () => {
-      const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
-      const loadedActivities = savedActivities ? JSON.parse(savedActivities) : mockActivities;
+    async function loadActivities() {
+      setIsLoading(true);
+      const loadedActivities = await getData<Activity>('activities');
       setAllActivities(loadedActivities);
       
       const uniqueCategories = Array.from(new Set(loadedActivities.map((act: Activity) => act.category)));
       setCategories(uniqueCategories);
+      setIsLoading(false);
     };
-
     loadActivities();
-    window.addEventListener('storage', loadActivities);
-
-    return () => {
-      window.removeEventListener('storage', loadActivities);
-    };
   }, []);
 
   useEffect(() => {
@@ -109,7 +103,7 @@ export default function ActivitiesPage() {
 
         <section>
           <h2 className="text-3xl font-headline font-semibold mb-6 text-center md:text-left">Explore Activities</h2>
-          <ActivityList activities={filteredActivities} />
+          {isLoading ? <p>Loading...</p> : <ActivityList activities={filteredActivities} />}
         </section>
       </div>
     </MainLayout>

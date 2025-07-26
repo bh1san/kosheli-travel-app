@@ -27,48 +27,60 @@ import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import Image from 'next/image';
-
-const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
+import { getData, savePromotion, deletePromotion } from '@/services/firestore';
 
 export default function AdminPromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
 
   useEffect(() => {
-    const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
-    setPromotions(savedPromotions ? JSON.parse(savedPromotions) : mockPromotions);
+    async function fetchPromotions() {
+      setIsLoading(true);
+      let data = await getData<Promotion>('promotions');
+      if (data.length === 0) {
+        await Promise.all(mockPromotions.map(promo => savePromotion(promo)));
+        data = mockPromotions;
+      }
+      setPromotions(data);
+      setIsLoading(false);
+    }
+    fetchPromotions();
   }, []);
 
-  const persistPromotions = (updatedPromotions: Promotion[]) => {
-    setPromotions(updatedPromotions);
-    localStorage.setItem(PROMOTIONS_STORAGE_KEY, JSON.stringify(updatedPromotions));
-    window.dispatchEvent(new Event('storage'));
-  };
-
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const promotionData = {
-      title: formData.get('title') as string,
-      description: formData.get('description') as string,
-      imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
-      discountPercentage: Number(formData.get('discountPercentage')),
-      discountCode: formData.get('discountCode') as string,
-      validUntil: new Date(formData.get('validUntil') as string).toISOString(),
-      type: formData.get('type') as 'flight' | 'activity' | 'package',
-    };
+    let promoData: Promotion;
 
     if (editingPromotion) {
-      const updatedPromotions = promotions.map(p => p.id === editingPromotion.id ? { ...editingPromotion, ...promotionData } : p);
-      persistPromotions(updatedPromotions);
-    } else {
-      const newPromotion: Promotion = {
-        id: `PROMO${Date.now()}`,
-        ...promotionData,
+      promoData = {
+        ...editingPromotion,
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        imageUrl: formData.get('imageUrl') as string,
+        discountPercentage: Number(formData.get('discountPercentage')),
+        discountCode: formData.get('discountCode') as string,
+        validUntil: new Date(formData.get('validUntil') as string).toISOString(),
+        type: formData.get('type') as 'flight' | 'activity' | 'package',
       };
-      persistPromotions([...promotions, newPromotion]);
+    } else {
+      promoData = {
+        id: `PROMO${Date.now()}`,
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
+        discountPercentage: Number(formData.get('discountPercentage')),
+        discountCode: formData.get('discountCode') as string,
+        validUntil: new Date(formData.get('validUntil') as string).toISOString(),
+        type: formData.get('type') as 'flight' | 'activity' | 'package',
+      };
     }
+    
+    await savePromotion(promoData);
+    const updatedPromotions = await getData<Promotion>('promotions');
+    setPromotions(updatedPromotions);
     
     closeDialog();
   };
@@ -78,10 +90,10 @@ export default function AdminPromotionsPage() {
     setIsDialogOpen(true);
   };
 
-  const handleDeletePromotion = (id: string) => {
+  const handleDeletePromotion = async (id: string) => {
      if(confirm('Are you sure you want to delete this promotion?')) {
-        const updatedPromotions = promotions.filter(p => p.id !== id);
-        persistPromotions(updatedPromotions);
+        await deletePromotion(id);
+        setPromotions(promotions.filter(p => p.id !== id));
      }
   };
   
@@ -141,35 +153,39 @@ export default function AdminPromotionsPage() {
       </div>
 
       <div className="bg-card p-4 rounded-lg shadow-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Image</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Discount</TableHead>
-              <TableHead>Valid Until</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {promotions.map((promo) => (
-              <TableRow key={promo.id}>
-                <TableCell>
-                  <Image src={promo.imageUrl} alt={promo.title} width={80} height={50} className="rounded-md object-cover" key={promo.imageUrl}/>
-                </TableCell>
-                <TableCell>{promo.title}</TableCell>
-                <TableCell>{promo.type}</TableCell>
-                <TableCell>{promo.discountPercentage ? `${promo.discountPercentage}%` : 'N/A'}</TableCell>
-                <TableCell>{new Date(promo.validUntil).toLocaleDateString()}</TableCell>
-                <TableCell className="space-x-2">
-                   <Button variant="outline" size="icon" onClick={() => handleEditClick(promo)}><Edit size={16} /></Button>
-                   <Button variant="destructive" size="icon" onClick={() => handleDeletePromotion(promo.id)}><Trash2 size={16} /></Button>
-                </TableCell>
+        {isLoading ? (
+          <p>Loading promotions...</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Image</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Discount</TableHead>
+                <TableHead>Valid Until</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {promotions.map((promo) => (
+                <TableRow key={promo.id}>
+                  <TableCell>
+                    <Image src={promo.imageUrl} alt={promo.title} width={80} height={50} className="rounded-md object-cover" key={promo.imageUrl}/>
+                  </TableCell>
+                  <TableCell>{promo.title}</TableCell>
+                  <TableCell>{promo.type}</TableCell>
+                  <TableCell>{promo.discountPercentage ? `${promo.discountPercentage}%` : 'N/A'}</TableCell>
+                  <TableCell>{new Date(promo.validUntil).toLocaleDateString()}</TableCell>
+                  <TableCell className="space-x-2">
+                     <Button variant="outline" size="icon" onClick={() => handleEditClick(promo)}><Edit size={16} /></Button>
+                     <Button variant="destructive" size="icon" onClick={() => handleDeletePromotion(promo.id)}><Trash2 size={16} /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
     </div>
   );

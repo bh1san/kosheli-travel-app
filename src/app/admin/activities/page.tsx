@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { mockActivities } from '@/lib/mockData';
 import type { Activity } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,49 +24,66 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import Image from 'next/image';
-
-const ACTIVITIES_STORAGE_KEY = 'adminActivities';
+import { getData, saveActivity, deleteActivity } from '@/services/firestore';
+import { mockActivities } from '@/lib/mockData';
 
 export default function AdminActivitiesPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
 
   useEffect(() => {
-    const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
-    setActivities(savedActivities ? JSON.parse(savedActivities) : mockActivities);
+    async function fetchActivities() {
+      setIsLoading(true);
+      let data = await getData<Activity>('activities');
+      if (data.length === 0) {
+        // If no data, seed with mock data
+        await Promise.all(mockActivities.map(activity => saveActivity(activity)));
+        data = mockActivities;
+      }
+      setActivities(data);
+      setIsLoading(false);
+    }
+    fetchActivities();
   }, []);
 
-  const persistActivities = (updatedActivities: Activity[]) => {
-    setActivities(updatedActivities);
-    localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(updatedActivities));
-    window.dispatchEvent(new Event('storage'));
-  };
-
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const activityData = {
-      name: formData.get('name') as string,
-      description: formData.get('description') as string,
-      imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
-      price: Number(formData.get('price')),
-      location: formData.get('location') as string,
-      rating: Number(formData.get('rating')),
-      category: formData.get('category') as string,
-    };
+    
+    let activityData: Activity;
 
     if (editingActivity) {
-      const updatedActivities = activities.map(a => a.id === editingActivity.id ? { ...editingActivity, ...activityData } : a);
-      persistActivities(updatedActivities);
-    } else {
-      const newActivity: Activity = {
-        ...activityData,
-        id: `ACT${Date.now()}`,
+      activityData = {
+        ...editingActivity,
+        name: formData.get('name') as string,
+        description: formData.get('description') as string,
+        imageUrl: formData.get('imageUrl') as string,
+        price: Number(formData.get('price')),
+        location: formData.get('location') as string,
+        rating: Number(formData.get('rating')),
+        category: formData.get('category') as string,
       };
-      persistActivities([...activities, newActivity]);
+    } else {
+      activityData = {
+        id: `ACT${Date.now()}`,
+        name: formData.get('name') as string,
+        description: formData.get('description') as string,
+        imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
+        price: Number(formData.get('price')),
+        location: formData.get('location') as string,
+        rating: Number(formData.get('rating')),
+        category: formData.get('category') as string,
+      };
     }
 
+    await saveActivity(activityData);
+    
+    // Refresh data
+    const updatedActivities = await getData<Activity>('activities');
+    setActivities(updatedActivities);
+    
     closeDialog();
   };
   
@@ -76,10 +92,10 @@ export default function AdminActivitiesPage() {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteActivity = (id: string) => {
+  const handleDeleteActivity = async (id: string) => {
     if(confirm('Are you sure you want to delete this activity?')) {
-      const updatedActivities = activities.filter(a => a.id !== id);
-      persistActivities(updatedActivities);
+      await deleteActivity(id);
+      setActivities(activities.filter(a => a.id !== id));
     }
   };
   
@@ -124,33 +140,37 @@ export default function AdminActivitiesPage() {
       </div>
 
       <div className="bg-card p-4 rounded-lg shadow-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Image</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {activities.map((activity) => (
-              <TableRow key={activity.id}>
-                <TableCell>
-                  <Image src={activity.imageUrl} alt={activity.name} width={80} height={50} className="rounded-md object-cover" key={activity.imageUrl}/>
-                </TableCell>
-                <TableCell>{activity.name}</TableCell>
-                <TableCell>{activity.category}</TableCell>
-                <TableCell>{activity.price.toFixed(2)} AED</TableCell>
-                <TableCell className="space-x-2">
-                   <Button variant="outline" size="icon" onClick={() => handleEditClick(activity)}><Edit size={16} /></Button>
-                   <Button variant="destructive" size="icon" onClick={() => handleDeleteActivity(activity.id)}><Trash2 size={16} /></Button>
-                </TableCell>
+        {isLoading ? (
+          <p>Loading activities...</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Image</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {activities.map((activity) => (
+                <TableRow key={activity.id}>
+                  <TableCell>
+                    <Image src={activity.imageUrl} alt={activity.name} width={80} height={50} className="rounded-md object-cover" key={activity.imageUrl}/>
+                  </TableCell>
+                  <TableCell>{activity.name}</TableCell>
+                  <TableCell>{activity.category}</TableCell>
+                  <TableCell>{activity.price.toFixed(2)} AED</TableCell>
+                  <TableCell className="space-x-2">
+                     <Button variant="outline" size="icon" onClick={() => handleEditClick(activity)}><Edit size={16} /></Button>
+                     <Button variant="destructive" size="icon" onClick={() => handleDeleteActivity(activity.id)}><Trash2 size={16} /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
     </div>
   );

@@ -25,50 +25,63 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import Image from 'next/image';
-
-const TEAM_STORAGE_KEY = 'adminTeam';
+import { getData, saveTeamMember, deleteTeamMember } from '@/services/firestore';
 
 export default function AdminTeamPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
 
   useEffect(() => {
-    const savedTeam = localStorage.getItem(TEAM_STORAGE_KEY);
-    setTeamMembers(savedTeam ? JSON.parse(savedTeam) : mockTeamMembers);
+    async function fetchTeam() {
+      setIsLoading(true);
+      let data = await getData<TeamMember>('team');
+      if (data.length === 0) {
+        await Promise.all(mockTeamMembers.map(member => saveTeamMember(member)));
+        data = mockTeamMembers;
+      }
+      setTeamMembers(data);
+      setIsLoading(false);
+    }
+    fetchTeam();
   }, []);
 
-  const persistTeam = (updatedTeam: TeamMember[]) => {
-    setTeamMembers(updatedTeam);
-    localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(updatedTeam));
-    window.dispatchEvent(new Event('storage'));
-  };
-
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const memberData = {
-      name: formData.get('name') as string,
-      role: formData.get('role') as string,
-      bio: formData.get('bio') as string,
-      imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/400x400.png',
-      socials: {
-        linkedin: formData.get('linkedin') as string,
-        twitter: formData.get('twitter') as string,
-      },
-    };
-
+    let memberData: TeamMember;
+    
     if (editingMember) {
-      const updatedTeam = teamMembers.map(m => m.id === editingMember.id ? { ...editingMember, ...memberData } : m);
-      persistTeam(updatedTeam);
-    } else {
-      const newMember: TeamMember = {
-        id: `TM${Date.now()}`,
-        ...memberData,
+      memberData = {
+        ...editingMember,
+        name: formData.get('name') as string,
+        role: formData.get('role') as string,
+        bio: formData.get('bio') as string,
+        imageUrl: formData.get('imageUrl') as string,
+        socials: {
+          linkedin: formData.get('linkedin') as string,
+          twitter: formData.get('twitter') as string,
+        },
       };
-      persistTeam([...teamMembers, newMember]);
+    } else {
+      memberData = {
+        id: `TM${Date.now()}`,
+        name: formData.get('name') as string,
+        role: formData.get('role') as string,
+        bio: formData.get('bio') as string,
+        imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/400x400.png',
+        socials: {
+          linkedin: formData.get('linkedin') as string,
+          twitter: formData.get('twitter') as string,
+        },
+      };
     }
 
+    await saveTeamMember(memberData);
+    const updatedTeam = await getData<TeamMember>('team');
+    setTeamMembers(updatedTeam);
+    
     closeDialog();
   };
   
@@ -77,10 +90,10 @@ export default function AdminTeamPage() {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteMember = (id: string) => {
+  const handleDeleteMember = async (id: string) => {
      if(confirm('Are you sure you want to delete this team member?')) {
-        const updatedTeam = teamMembers.filter(m => m.id !== id);
-        persistTeam(updatedTeam);
+        await deleteTeamMember(id);
+        setTeamMembers(teamMembers.filter(m => m.id !== id));
      }
   };
   
@@ -122,31 +135,35 @@ export default function AdminTeamPage() {
       </div>
 
       <div className="bg-card p-4 rounded-lg shadow-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Image</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {teamMembers.map((member) => (
-              <TableRow key={member.id}>
-                <TableCell>
-                  <Image src={member.imageUrl} alt={member.name} width={60} height={60} className="rounded-full object-cover" key={member.imageUrl}/>
-                </TableCell>
-                <TableCell>{member.name}</TableCell>
-                <TableCell>{member.role}</TableCell>
-                <TableCell className="space-x-2">
-                   <Button variant="outline" size="icon" onClick={() => handleEditClick(member)}><Edit size={16} /></Button>
-                   <Button variant="destructive" size="icon" onClick={() => handleDeleteMember(member.id)}><Trash2 size={16} /></Button>
-                </TableCell>
+        {isLoading ? (
+          <p>Loading team members...</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Image</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {teamMembers.map((member) => (
+                <TableRow key={member.id}>
+                  <TableCell>
+                    <Image src={member.imageUrl} alt={member.name} width={60} height={60} className="rounded-full object-cover" key={member.imageUrl}/>
+                  </TableCell>
+                  <TableCell>{member.name}</TableCell>
+                  <TableCell>{member.role}</TableCell>
+                  <TableCell className="space-x-2">
+                     <Button variant="outline" size="icon" onClick={() => handleEditClick(member)}><Edit size={16} /></Button>
+                     <Button variant="destructive" size="icon" onClick={() => handleDeleteMember(member.id)}><Trash2 size={16} /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,7 +6,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { mockPromotions, mockActivities, mockFlights, mockTeamMembers } from '@/lib/mockData';
+import { mockFlights } from '@/lib/mockData'; // Flights are still mock
 import type { Promotion, Activity, Flight, TeamMember } from '@/types';
 import { PromotionList } from '@/components/promotions/PromotionList';
 import { ActivityCard } from '@/components/activities/ActivityCard';
@@ -15,12 +14,10 @@ import { FlightCard } from '@/components/flights/FlightCard';
 import { Plane, MapPin, Sparkles } from 'lucide-react';
 import { FlightSearchForm } from '@/components/flights/FlightSearchForm';
 import { TeamMemberCard } from '@/components/team/TeamMemberCard';
+import { getData, getDocData } from '@/services/firestore';
 
-const HERO_IMAGE_STORAGE_KEY = 'heroImageUrl';
-const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
-const ACTIVITIES_STORAGE_KEY = 'adminActivities';
-const TEAM_STORAGE_KEY = 'adminTeam';
 const DEFAULT_HERO_IMAGE = 'https://placehold.co/1200x800.png';
+const SETTINGS_DOC_ID = 'siteSettings';
 
 export default function HomePage() {
   const [heroImageUrl, setHeroImageUrl] = useState(DEFAULT_HERO_IMAGE);
@@ -28,37 +25,33 @@ export default function HomePage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = () => {
-      // Load Hero Image
-      const savedHeroUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
-      setHeroImageUrl(savedHeroUrl || DEFAULT_HERO_IMAGE);
-
-      // Load Promotions
-      const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
-      setPromotions(savedPromotions ? JSON.parse(savedPromotions) : mockPromotions);
+    async function loadData() {
+      setIsLoading(true);
       
-      // Load Activities
-      const savedActivities = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
-      setActivities(savedActivities ? JSON.parse(savedActivities) : mockActivities);
-      
-      // Load Team Members
-      const savedTeam = localStorage.getItem(TEAM_STORAGE_KEY);
-      setTeamMembers(savedTeam ? JSON.parse(savedTeam) : mockTeamMembers);
+      // Load settings
+      const settings = await getDocData('settings', SETTINGS_DOC_ID);
+      if (settings && settings.heroImageUrl) {
+        setHeroImageUrl(settings.heroImageUrl);
+      }
 
-      // Load Flights (from mock for now)
+      // Load collections
+      const promotionsData = await getData<Promotion>('promotions');
+      const activitiesData = await getData<Activity>('activities');
+      const teamData = await getData<TeamMember>('team');
+
+      setPromotions(promotionsData);
+      setActivities(activitiesData);
+      setTeamMembers(teamData);
+
+      // Flights are still from mock data as per current scope
       setFlights(mockFlights);
+      setIsLoading(false);
     };
 
     loadData();
-
-    // Listen for changes from other tabs/windows, or our custom events
-    window.addEventListener('storage', loadData);
-    
-    return () => {
-      window.removeEventListener('storage', loadData);
-    };
   }, []);
 
   const featuredPromotions = promotions.slice(0, 3);
@@ -74,6 +67,10 @@ export default function HomePage() {
     (cheapest === null || current.price < cheapest.price) ? current : cheapest, 
     null as Flight | null
   );
+
+  if (isLoading) {
+    return <MainLayout><div className="text-center">Loading site data...</div></MainLayout>;
+  }
 
   return (
     <MainLayout>

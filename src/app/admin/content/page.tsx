@@ -8,58 +8,55 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { getDocData, saveDocData } from '@/services/firestore';
 
-const HERO_IMAGE_STORAGE_KEY = 'heroImageUrl';
-const LOGO_IMAGE_STORAGE_KEY = 'logoImageUrl';
+const DEFAULT_HERO_IMAGE = 'https://placehold.co/1200x800.png';
 const DEFAULT_LOGO_IMAGE = '/images/logo.png';
+const SETTINGS_DOC_ID = 'siteSettings';
 
 export default function AdminContentPage() {
-  const [heroImageUrl, setHeroImageUrl] = useState('https://placehold.co/1200x800.png');
+  const [heroImageUrl, setHeroImageUrl] = useState(DEFAULT_HERO_IMAGE);
   const [logoUrl, setLogoUrl] = useState(DEFAULT_LOGO_IMAGE);
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedHeroUrl = localStorage.getItem(HERO_IMAGE_STORAGE_KEY);
-    if (savedHeroUrl) {
-      setHeroImageUrl(savedHeroUrl);
+    async function fetchSettings() {
+      const settings = await getDocData('settings', SETTINGS_DOC_ID);
+      if (settings) {
+        setHeroImageUrl(settings.heroImageUrl || DEFAULT_HERO_IMAGE);
+        setLogoUrl(settings.logoUrl || DEFAULT_LOGO_IMAGE);
+      }
     }
-    const savedLogoUrl = localStorage.getItem(LOGO_IMAGE_STORAGE_KEY);
-    if (savedLogoUrl) {
-      setLogoUrl(savedLogoUrl);
-    }
+    fetchSettings();
   }, []);
 
-  const handleUpdateHeroImage = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateHeroImage = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const newUrl = formData.get('heroImageUrl') as string;
     
     if (newUrl) {
+      await saveDocData('settings', SETTINGS_DOC_ID, { heroImageUrl: newUrl });
       setHeroImageUrl(newUrl);
-      localStorage.setItem(HERO_IMAGE_STORAGE_KEY, newUrl);
       toast({
         title: 'Content Updated',
         description: 'The hero banner image has been updated successfully.',
       });
-      // This custom event will be picked up by other components
-      window.dispatchEvent(new Event('storage'));
     }
   };
 
-  const handleUpdateLogo = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateLogo = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const newUrl = formData.get('logoImageUrl') as string;
     
     if (newUrl) {
+      await saveDocData('settings', SETTINGS_DOC_ID, { logoUrl: newUrl });
       setLogoUrl(newUrl);
-      localStorage.setItem(LOGO_IMAGE_STORAGE_KEY, newUrl);
       toast({
         title: 'Logo Updated',
         description: 'The site logo has been updated successfully.',
       });
-      // This custom event will be picked up by the Logo component
-      window.dispatchEvent(new Event('storage'));
     }
   };
 

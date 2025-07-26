@@ -5,25 +5,20 @@ import { useState, useEffect } from 'react';
 import type { Promotion } from '@/types';
 import { PromotionList } from '@/components/promotions/PromotionList';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { mockPromotions } from '@/lib/mockData';
-
-const PROMOTIONS_STORAGE_KEY = 'adminPromotions';
+import { getData } from '@/services/firestore';
 
 export default function PromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadPromotions = () => {
-      const savedPromotions = localStorage.getItem(PROMOTIONS_STORAGE_KEY);
-      setPromotions(savedPromotions ? JSON.parse(savedPromotions) : mockPromotions);
+    async function loadPromotions() {
+      setIsLoading(true);
+      const data = await getData<Promotion>('promotions');
+      setPromotions(data);
+      setIsLoading(false);
     };
-
     loadPromotions();
-    window.addEventListener('storage', loadPromotions);
-
-    return () => {
-      window.removeEventListener('storage', loadPromotions);
-    };
   }, []);
 
   return (
@@ -36,7 +31,7 @@ export default function PromotionsPage() {
           </p>
         </section>
         
-        <PromotionList promotions={promotions} title="All Current Promotions"/>
+        {isLoading ? <p>Loading...</p> : <PromotionList promotions={promotions} title="All Current Promotions"/>}
       </div>
     </MainLayout>
   );
