@@ -4,7 +4,7 @@ export const mockFlights: Flight[] = [
   {
     id: 'FL001',
     airline: 'Emirates',
-    airlineLogoUrl: 'https://placehold.co/100x40.png', // Replace with actual logo if available
+    airlineLogoUrl: 'https://placehold.co/100x40.png', 
     flightNumber: 'EK203',
     departureCity: 'New York',
     departureAirportCode: 'JFK',
@@ -13,7 +13,7 @@ export const mockFlights: Flight[] = [
     departureTime: '2024-09-15T22:00:00Z',
     arrivalTime: '2024-09-16T18:00:00Z',
     duration: '14h 0m',
-    price: 850,
+    price: 3120, // AED
     stops: 0,
   },
   {
@@ -28,12 +28,13 @@ export const mockFlights: Flight[] = [
     departureTime: '2024-09-16T14:30:00Z',
     arrivalTime: '2024-09-17T00:45:00Z',
     duration: '7h 15m',
-    price: 600,
+    price: 2200, // AED
     stops: 0,
   },
   {
     id: 'FL003',
     airline: 'British Airways',
+    airlineLogoUrl: 'https://placehold.co/100x40.png',
     flightNumber: 'BA105',
     departureCity: 'London',
     departureAirportCode: 'LHR',
@@ -42,12 +43,13 @@ export const mockFlights: Flight[] = [
     departureTime: '2024-09-18T21:00:00Z',
     arrivalTime: '2024-09-19T07:10:00Z',
     duration: '7h 10m',
-    price: 620,
+    price: 2275, // AED
     stops: 0,
   },
   {
     id: 'FL004',
     airline: 'Lufthansa',
+    airlineLogoUrl: 'https://placehold.co/100x40.png',
     flightNumber: 'LH630',
     departureCity: 'Frankfurt',
     departureAirportCode: 'FRA',
@@ -56,7 +58,37 @@ export const mockFlights: Flight[] = [
     departureTime: '2024-09-20T15:00:00Z',
     arrivalTime: '2024-09-20T23:05:00Z',
     duration: '6h 5m',
-    price: 550,
+    price: 2020, // AED
+    stops: 0,
+  },
+  {
+    id: 'FL005',
+    airline: 'Flydubai',
+    airlineLogoUrl: 'https://placehold.co/100x40.png',
+    flightNumber: 'FZ573',
+    departureCity: 'Dubai',
+    departureAirportCode: 'DXB',
+    arrivalCity: 'Kathmandu',
+    arrivalAirportCode: 'KTM',
+    departureTime: '2024-10-10T11:40:00Z',
+    arrivalTime: '2024-10-10T17:45:00Z',
+    duration: '4h 20m',
+    price: 1100, // AED
+    stops: 0,
+  },
+    {
+    id: 'FL006',
+    airline: 'Himalaya Airlines',
+    airlineLogoUrl: 'https://placehold.co/100x40.png',
+    flightNumber: 'H9566',
+    departureCity: 'Dubai',
+    departureAirportCode: 'DXB',
+    arrivalCity: 'Kathmandu',
+    arrivalAirportCode: 'KTM',
+    departureTime: '2024-10-11T04:45:00Z',
+    arrivalTime: '2024-10-11T10:50:00Z',
+    duration: '4h 20m',
+    price: 950, // AED - This is the cheapest one
     stops: 0,
   },
 ];
@@ -68,7 +100,7 @@ export const mockActivities: Activity[] = [
     description: 'Experience the thrill of dune bashing, enjoy a traditional BBQ dinner, and watch cultural performances under the stars.',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'desert safari',
-    price: 75,
+    price: 275, // AED
     location: 'Dubai Desert Conservation Reserve',
     rating: 4.8,
     category: 'Adventure',
@@ -79,7 +111,7 @@ export const mockActivities: Activity[] = [
     description: "Visit the world's tallest building and enjoy panoramic views of Dubai from the 'At the Top' observation deck.",
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'dubai skyline',
-    price: 150,
+    price: 550, // AED
     location: 'Downtown Dubai',
     rating: 4.9,
     category: 'Sightseeing',
@@ -90,7 +122,7 @@ export const mockActivities: Activity[] = [
     description: 'Shop at one of the world\'s largest malls and witness the spectacular Dubai Fountain show.',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'shopping mall',
-    price: 0, // Free to enter mall and watch show
+    price: 0, 
     location: 'Downtown Dubai',
     rating: 4.7,
     category: 'Shopping & Entertainment',
@@ -101,7 +133,7 @@ export const mockActivities: Activity[] = [
     description: 'Enjoy a relaxing evening cruise along the Dubai Marina, complete with a buffet dinner and live entertainment.',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cruise ship',
-    price: 60,
+    price: 220, // AED
     location: 'Dubai Marina',
     rating: 4.5,
     category: 'Dining & Cruise',
@@ -112,7 +144,7 @@ export const mockActivities: Activity[] = [
     description: 'Experience winter in the desert at Ski Dubai, featuring an indoor ski resort and snow park.',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'skiing snow',
-    price: 90,
+    price: 330, // AED
     location: 'Mall of the Emirates',
     rating: 4.6,
     category: 'Adventure',

@@ -29,7 +29,20 @@ export default function HomePage() {
 
   const featuredPromotions = mockPromotions.slice(0, 3);
   const featuredActivities = mockActivities.slice(0, 3);
-  const featuredFlights = mockFlights.slice(0,2);
+  
+  // Find the cheapest flight from Dubai to Nepal (Kathmandu)
+  const flightsToNepal = mockFlights.filter(
+    (flight) =>
+      flight.departureAirportCode === 'DXB' &&
+      flight.arrivalAirportCode === 'KTM'
+  );
+  
+  const cheapestFlightToNepal = flightsToNepal.length > 0 
+    ? flightsToNepal.reduce((cheapest, current) => 
+        current.price < cheapest.price ? current : cheapest
+      ) 
+    : null;
+
   const teamMembers = mockTeamMembers.slice(0, 3);
 
   return (
@@ -98,11 +111,13 @@ export default function HomePage() {
         
         {/* Featured Flights */}
          <section className="py-8">
-          <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Featured Flights</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {featuredFlights.map(flight => (
-              <FlightCard key={flight.id} flight={flight} />
-            ))}
+          <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Featured Flight to Nepal</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {cheapestFlightToNepal ? (
+              <FlightCard key={cheapestFlightToNepal.id} flight={cheapestFlightToNepal} />
+            ) : (
+              <p className="text-center md:col-span-2 text-muted-foreground">No flights to Nepal are available at this time.</p>
+            )}
           </div>
           <div className="text-center mt-8">
             <Button asChild variant="outline">
