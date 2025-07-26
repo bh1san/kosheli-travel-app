@@ -13,7 +13,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut, Users, Image as ImageIcon } from 'lucide-react';
+import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut, Users, Image as ImageIcon, Users2 } from 'lucide-react';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: <LayoutDashboard /> },
@@ -22,7 +22,8 @@ const navItems = [
   { href: '/admin/promotions', label: 'Promotions', icon: <TicketPercent /> },
   { href: '/admin/users', label: 'Users', icon: <Users /> },
   { href: '/admin/content', label: 'Content', icon: <ImageIcon /> },
-  // { href: '/admin/settings', label: 'Settings', icon: <Settings /> }, // Future item
+  { href: '/admin/visa', label: 'Visa', icon: <FileText /> },
+  { href: '/admin/team', label: 'Team', icon: <Users2 /> },
 ];
 
 export function AdminSidebar() {
@@ -37,18 +38,16 @@ export function AdminSidebar() {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))}
-                  tooltip={{ children: item.label, side: 'right', align: 'center' }}
-                >
-                  <a>
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </a>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))}
+                tooltip={{ children: item.label, side: 'right', align: 'center' }}
+              >
+                <Link href={item.href}>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
