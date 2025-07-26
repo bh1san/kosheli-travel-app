@@ -26,6 +26,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Plane, User, Mail, Phone, Globe, FileText, Calendar, Upload, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import applyForVisaAction from '@/actions/visa';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+
+const MAX_FILE_SIZE = 5000000; // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
 
 const visaFormSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
@@ -35,7 +42,14 @@ const visaFormSchema = z.object({
   destination: z.enum(['uae', 'europe'], { required_error: 'Please select a destination.' }),
   visaType: z.string().min(1, 'Visa type is required.'),
   travelDates: z.string().min(1, 'Travel dates are required.'),
-  passportCopy: z.any().optional(), // In a real app, handle file uploads securely
+  passportCopy: z
+    .any()
+    .refine((files) => files?.length == 1, "Passport copy is required.")
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      ".jpg, .jpeg, .png and .webp files are accepted."
+    ),
   notes: z.string().optional(),
 });
 
@@ -61,6 +75,8 @@ const europeVisaTypes = [
 
 export default function VisaPage() {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm<VisaFormValues>({
     resolver: zodResolver(visaFormSchema),
@@ -75,17 +91,55 @@ export default function VisaPage() {
     },
   });
 
-  const onSubmit = (data: VisaFormValues) => {
-    // In a real application, this would be a server action
-    // that securely handles form data and file uploads.
-    console.log('New Visa Application:', data);
+  const fileRef = form.register("passportCopy");
 
-    toast({
-      title: 'Visa Application Submitted!',
-      description: "Thank you for submitting your application. We will review it and contact you shortly.",
-    });
+  const onSubmit = async (data: VisaFormValues) => {
+    setIsLoading(true);
+    setFormError(null);
 
-    form.reset();
+    const file = data.passportCopy[0];
+    const reader = new FileReader();
+
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      
+      const applicationData = {
+        ...data,
+        passportDataUri: base64String,
+      };
+
+      try {
+        const result = await applyForVisaAction(applicationData);
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        
+        toast({
+          title: 'Visa Application Submitted!',
+          description: result.confirmationMessage || "We will review it and contact you shortly.",
+        });
+
+        form.reset();
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        setFormError(errorMessage);
+        toast({
+            variant: "destructive",
+            title: "Submission Failed",
+            description: errorMessage,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    reader.onerror = () => {
+        setFormError("Failed to read the passport file. Please try again.");
+        setIsLoading(false);
+    };
+    
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -141,6 +195,12 @@ export default function VisaPage() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                 {formError && (
+                  <Alert variant="destructive">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{formError}</AlertDescription>
+                  </Alert>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
@@ -231,7 +291,7 @@ export default function VisaPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center"><Upload size={14} className="mr-1" /> Passport Copy</FormLabel>
-                        <FormControl><Input type="file" {...field} /></FormControl>
+                        <FormControl><Input type="file" {...fileRef} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -248,7 +308,9 @@ export default function VisaPage() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">Submit Application</Button>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Submitting...' : 'Submit Application'}
+                </Button>
               </form>
             </Form>
           </CardContent>
