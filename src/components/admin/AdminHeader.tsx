@@ -1,10 +1,9 @@
-
 'use client';
 
-import Link from 'next/link';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
+import { Logo } from '../layout/Logo';
 
 export function AdminHeader() {
   return (
@@ -12,12 +11,7 @@ export function AdminHeader() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="md:hidden" />
-          <Link href="/admin" className="flex items-center gap-2">
-            <div className="flex flex-col items-start leading-none">
-             <h1 className="text-lg font-bold font-headline text-primary">Kosheli Admin</h1>
-             <p className="text-xs font-semibold text-primary/80 tracking-widest">TRAVEL & TOURISM</p>
-           </div>
-          </Link>
+          <Logo isAdmin={true} />
         </div>
         <div>
           {/* Placeholder for future logout or user profile */}

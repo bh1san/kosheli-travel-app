@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -10,6 +9,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState } from 'react';
+import { Logo } from './Logo';
 
 const NavLink = ({ href, children, icon, onClick }: { href: string; children: React.ReactNode; icon?: React.ReactNode, onClick?: () => void }) => (
   <Link href={href} passHref>
@@ -37,12 +37,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
-           <div className="flex flex-col items-start leading-none">
-             <h1 className="text-2xl font-bold font-headline text-primary">Kosheli</h1>
-             <p className="text-xs font-semibold text-primary/80 tracking-widest">TRAVEL & TOURISM</p>
-           </div>
-        </Link>
+        <Logo />
         
         <nav className="hidden md:flex items-center space-x-1">
           {navItems}
@@ -57,12 +52,9 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] p-6">
-               <Link href="/" className="flex items-center gap-2 mb-6">
-                 <div className="flex flex-col items-start leading-none">
-                   <h1 className="text-2xl font-bold font-headline text-primary">Kosheli</h1>
-                   <p className="text-xs font-semibold text-primary/80 tracking-widest">TRAVEL & TOURISM</p>
-                 </div>
-              </Link>
+               <div className="mb-6">
+                 <Logo />
+               </div>
               <nav className="flex flex-col space-y-2">
                 {navItems}
               </nav>
