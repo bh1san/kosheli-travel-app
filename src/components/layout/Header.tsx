@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Plane, MapPin, Sparkles, Ticket, Menu, Send } from 'lucide-react';
+import { Plane, MapPin, Sparkles, Ticket, Menu, Send, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -28,6 +28,7 @@ export function Header() {
       <NavLink href="/flights" icon={<Plane size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Flights</NavLink>
       <NavLink href="/activities" icon={<MapPin size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Activities</NavLink>
       <NavLink href="/promotions" icon={<Ticket size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Promotions</NavLink>
+      <NavLink href="/visa" icon={<FileText size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Visa Services</NavLink>
       <NavLink href="/recommendations" icon={<Sparkles size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Recommendations</NavLink>
       <NavLink href="/contact" icon={<Send size={18} />} onClick={() => setIsMobileMenuOpen(false)}>Contact</NavLink>
     </>
