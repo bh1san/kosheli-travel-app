@@ -1,4 +1,4 @@
-import type { Flight, Activity, Promotion } from '@/types';
+import type { Flight, Activity, Promotion, TeamMember, Visa } from '@/types';
 
 export const mockFlights: Flight[] = [
   {
@@ -150,4 +150,46 @@ export const mockPromotions: Promotion[] = [
     validUntil: '2024-10-31',
     type: 'package',
   },
+];
+
+export const mockTeamMembers: TeamMember[] = [
+  {
+    id: 'TM001',
+    name: 'John Doe',
+    role: 'CEO & Founder',
+    bio: 'With over 20 years of experience in the travel industry, John leads our team with a passion for creating unforgettable journeys.',
+    imageUrl: 'https://placehold.co/400x400.png',
+    socials: {
+      linkedin: 'https://linkedin.com/in/johndoe',
+      twitter: 'https://twitter.com/johndoe',
+    },
+  },
+  {
+    id: 'TM002',
+    name: 'Jane Smith',
+    role: 'Head of Operations',
+    bio: 'Jane ensures that every aspect of your trip is seamless, from booking to your return home. Her attention to detail is second to none.',
+    imageUrl: 'https://placehold.co/400x400.png',
+    socials: {
+      linkedin: 'https://linkedin.com/in/janesmith',
+      twitter: 'https://twitter.com/janesmith',
+    },
+  },
+  {
+    id: 'TM003',
+    name: 'Peter Jones',
+    role: 'Lead Travel Consultant',
+    bio: 'Peter is our Dubai expert. He has lived in the city for over a decade and knows all the hidden gems to make your trip special.',
+    imageUrl: 'https://placehold.co/400x400.png',
+    socials: {
+      linkedin: 'https://linkedin.com/in/peterjones',
+      twitter: 'https://twitter.com/peterjones',
+    },
+  },
+];
+
+export const mockVisas: Visa[] = [
+  { id: 'VISA001', name: 'Tourist Visa (30 Days)', description: 'Single entry visa for tourism purposes.', destination: 'uae' },
+  { id: 'VISA002', name: 'Tourist Visa (60 Days)', description: 'Extended tourist visa for longer stays.', destination: 'uae' },
+  { id: 'VISA003', name: 'Schengen Tourist Visa', description: 'Visa for travel across the European Schengen area.', destination: 'europe' },
 ];

@@ -3,17 +3,19 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { mockPromotions, mockActivities, mockFlights } from '@/lib/mockData';
+import { mockPromotions, mockActivities, mockFlights, mockTeamMembers } from '@/lib/mockData';
 import { PromotionList } from '@/components/promotions/PromotionList';
 import { ActivityCard } from '@/components/activities/ActivityCard';
 import { FlightCard } from '@/components/flights/FlightCard';
-import { Plane, MapPin, Sparkles, Ticket } from 'lucide-react';
+import { Plane, MapPin, Sparkles } from 'lucide-react';
 import { FlightSearchForm } from '@/components/flights/FlightSearchForm';
+import { TeamMemberCard } from '@/components/team/TeamMemberCard';
 
 export default function HomePage() {
   const featuredPromotions = mockPromotions.slice(0, 3);
   const featuredActivities = mockActivities.slice(0, 3);
   const featuredFlights = mockFlights.slice(0,2);
+  const teamMembers = mockTeamMembers.slice(0, 3); // Show up to 3 team members
 
   return (
     <MainLayout>
@@ -90,6 +92,16 @@ export default function HomePage() {
             <Button asChild variant="outline">
               <Link href="/flights">Search All Flights</Link>
             </Button>
+          </div>
+        </section>
+
+        {/* Team Section */}
+        <section className="py-8">
+          <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Meet Our Team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {teamMembers.map(member => (
+              <TeamMemberCard key={member.id} member={member} />
+            ))}
           </div>
         </section>
 

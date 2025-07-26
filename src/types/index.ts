@@ -38,6 +38,25 @@ export interface Promotion {
   dataAiHint?: string;
 }
 
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  imageUrl: string;
+  socials?: {
+    linkedin?: string;
+    twitter?: string;
+  };
+}
+
+export interface Visa {
+    id: string;
+    name: string;
+    description: string;
+    destination: 'uae' | 'europe';
+}
+
 export type CartItem = (
   | { itemType: 'flight'; details: Flight }
   | { itemType: 'activity'; details: Activity }
