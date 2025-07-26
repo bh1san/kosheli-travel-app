@@ -13,7 +13,7 @@ import { useState } from 'react';
 
 const NavLink = ({ href, children, icon, onClick }: { href: string; children: React.ReactNode; icon?: React.ReactNode, onClick?: () => void }) => (
   <Link href={href} passHref>
-    <Button variant="ghost" className="text-foreground hover:bg-primary/10 flex items-center gap-2" onClick={onClick}>
+    <Button variant="ghost" className="text-foreground hover:bg-primary/10 flex items-center gap-2 justify-start" onClick={onClick}>
       {icon}
       {children}
     </Button>
@@ -56,7 +56,13 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] p-6">
-              <nav className="flex flex-col space-y-4 mt-6">
+               <Link href="/" className="flex items-center gap-2 mb-6">
+                 <div className="flex flex-col items-start leading-none">
+                   <h1 className="text-2xl font-bold font-headline text-primary">Kosheli</h1>
+                   <p className="text-xs font-semibold text-primary/80 tracking-widest">TRAVEL & TOURISM</p>
+                 </div>
+              </Link>
+              <nav className="flex flex-col space-y-2">
                 {navItems}
               </nav>
             </SheetContent>
