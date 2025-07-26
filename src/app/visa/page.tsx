@@ -25,7 +25,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Plane, User, Mail, Phone, Globe, FileText, Calendar, Upload } from 'lucide-react';
+import { Plane, User, Mail, Phone, Globe, FileText, Calendar, Upload, CheckCircle } from 'lucide-react';
 
 const visaFormSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
@@ -40,6 +40,24 @@ const visaFormSchema = z.object({
 });
 
 type VisaFormValues = z.infer<typeof visaFormSchema>;
+
+const uaeVisaTypes = [
+    "Tourist Visa (30/60 Days)",
+    "Visit Visa (90 Days)",
+    "Transit Visa (48/96 Hours)",
+    "Student Visa",
+    "Investor Visa",
+    "Remote Work Visa",
+];
+
+const europeVisaTypes = [
+    "Schengen Tourist Visa (Type C)",
+    "Business Visa",
+    "Visitor Visa (Family/Friends)",
+    "Student Visa (Type D)",
+    "Work Visa",
+];
+
 
 export default function VisaPage() {
   const { toast } = useToast();
@@ -78,6 +96,41 @@ export default function VisaPage() {
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
             Apply for your travel visa to the UAE or European countries with our expert assistance.
           </p>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <CardTitle className="text-xl font-headline">Available UAE Visas</CardTitle>
+                    <CardDescription>We provide expert processing for various UAE visa types.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ul className="space-y-2">
+                        {uaeVisaTypes.map(visa => (
+                            <li key={visa} className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>{visa}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </CardContent>
+            </Card>
+             <Card className="shadow-lg">
+                <CardHeader>
+                    <CardTitle className="text-xl font-headline">Available Europe (Schengen) Visas</CardTitle>
+                    <CardDescription>Streamline your application for Schengen area countries.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ul className="space-y-2">
+                        {europeVisaTypes.map(visa => (
+                            <li key={visa} className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>{visa}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </CardContent>
+            </Card>
         </section>
 
         <Card className="w-full max-w-3xl mx-auto shadow-xl">
