@@ -56,7 +56,6 @@ export default function HomePage() {
 
   const featuredPromotions = promotions.slice(0, 3);
   const featuredActivities = activities.slice(0, 3);
-  const featuredTeamMembers = teamMembers.slice(0, 3);
   
   // Find the cheapest flight from Dubai to Nepal (Kathmandu)
   const cheapestFlightToNepal = flights.filter(
@@ -157,7 +156,7 @@ export default function HomePage() {
         <section className="py-8">
           <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Meet Our Team</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredTeamMembers.map(member => (
+            {teamMembers.map(member => (
               <TeamMemberCard key={member.id} member={member} />
             ))}
           </div>
