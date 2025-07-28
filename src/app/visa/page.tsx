@@ -3,7 +3,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,31 +28,8 @@ import { Plane, User, Mail, Phone, Globe, FileText, Calendar, Upload, CheckCircl
 import { useState } from 'react';
 import applyForVisaAction from '@/actions/visa';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-
-const MAX_FILE_SIZE = 5000000; // 5MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-
-
-const visaFormSchema = z.object({
-  fullName: z.string().min(1, 'Full name is required.'),
-  email: z.string().email('Invalid email address.'),
-  phone: z.string().optional(),
-  nationality: z.string().min(1, 'Nationality is required.'),
-  destination: z.enum(['uae', 'europe'], { required_error: 'Please select a destination.' }),
-  visaType: z.string().min(1, 'Visa type is required.'),
-  travelDates: z.string().min(1, 'Travel dates are required.'),
-  passportCopy: z
-    .any()
-    .refine((files) => files?.length == 1, "Passport copy is required.")
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-      ".jpg, .jpeg, .png and .webp files are accepted."
-    ),
-  notes: z.string().optional(),
-});
-
-type VisaFormValues = z.infer<typeof visaFormSchema>;
+import type { VisaFormValues } from '@/types/visa';
+import { visaFormSchema } from '@/types/visa';
 
 const uaeVisaTypes = [
     "Tourist Visa (30/60 Days)",
@@ -104,7 +80,14 @@ export default function VisaPage() {
       const base64String = reader.result as string;
       
       const applicationData = {
-        ...data,
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        nationality: data.nationality,
+        destination: data.destination,
+        visaType: data.visaType,
+        travelDates: data.travelDates,
+        notes: data.notes,
         passportDataUri: base64String,
       };
 

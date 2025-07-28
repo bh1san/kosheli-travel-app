@@ -10,22 +10,17 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { visaFormSchema } from '@/types/visa';
 
-export const VisaApplicationInputSchema = z.object({
-  fullName: z.string().describe('The full name of the applicant.'),
-  email: z.string().email().describe('The email address of the applicant.'),
-  phone: z.string().optional().describe('The phone number of the applicant.'),
-  nationality: z.string().describe('The nationality of the applicant.'),
-  destination: z.enum(['uae', 'europe']).describe('The visa destination.'),
-  visaType: z.string().describe('The type of visa being applied for.'),
-  travelDates: z.string().describe('The planned travel dates.'),
+// Remove passportCopy from the flow input, as we handle the data URI directly.
+const VisaApplicationInputSchema = visaFormSchema.omit({ passportCopy: true }).extend({
   passportDataUri: z
     .string()
     .describe(
       "A scanned copy of the user's passport, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
-  notes: z.string().optional().describe('Any additional notes from the applicant.'),
 });
+
 export type VisaApplicationInput = z.infer<typeof VisaApplicationInputSchema>;
 
 export const VisaApplicationOutputSchema = z.object({

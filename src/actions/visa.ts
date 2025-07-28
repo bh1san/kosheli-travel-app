@@ -5,7 +5,7 @@ import { applyForVisa as applyForVisaFlow } from '@/ai/flows/visa-application-fl
 import type { VisaApplicationInput, VisaApplicationOutput } from '@/ai/flows/visa-application-flow';
 
 async function applyForVisaAction(
-  input: Omit<VisaApplicationInput, 'passportCopy'>
+  input: VisaApplicationInput
 ): Promise<VisaApplicationOutput | { error: string }> {
   try {
     const result = await applyForVisaFlow(input);
