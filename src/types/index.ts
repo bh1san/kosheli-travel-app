@@ -1,3 +1,4 @@
+
 export interface Flight {
   id: string;
   airline: string;
@@ -18,6 +19,7 @@ export interface Activity {
   id: string;
   name: string;
   description: string;
+  longDescription?: string;
   imageUrl: string;
   price: number;
   location: string;

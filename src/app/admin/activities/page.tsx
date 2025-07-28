@@ -59,6 +59,7 @@ export default function AdminActivitiesPage() {
         ...editingActivity,
         name: formData.get('name') as string,
         description: formData.get('description') as string,
+        longDescription: formData.get('longDescription') as string,
         imageUrl: formData.get('imageUrl') as string,
         price: Number(formData.get('price')),
         location: formData.get('location') as string,
@@ -70,6 +71,7 @@ export default function AdminActivitiesPage() {
         id: `ACT${Date.now()}`,
         name: formData.get('name') as string,
         description: formData.get('description') as string,
+        longDescription: formData.get('longDescription') as string,
         imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/600x400.png',
         price: Number(formData.get('price')),
         location: formData.get('location') as string,
@@ -119,13 +121,14 @@ export default function AdminActivitiesPage() {
               <PlusCircle className="mr-2" /> Add New Activity
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingActivity ? 'Edit Activity' : 'Add a New Activity'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div><Label htmlFor="name">Name</Label><Input id="name" name="name" required defaultValue={editingActivity?.name} /></div>
-              <div><Label htmlFor="description">Description</Label><Textarea id="description" name="description" required defaultValue={editingActivity?.description} /></div>
+              <div><Label htmlFor="description">Short Description (for card)</Label><Textarea id="description" name="description" required defaultValue={editingActivity?.description} /></div>
+              <div><Label htmlFor="longDescription">Long Description (for details page)</Label><Textarea id="longDescription" name="longDescription" rows={5} defaultValue={editingActivity?.longDescription} /></div>
               <div><Label htmlFor="imageUrl">Image URL</Label><Input id="imageUrl" name="imageUrl" placeholder="https://placehold.co/600x400.png" defaultValue={editingActivity?.imageUrl} /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div><Label htmlFor="price">Price (AED)</Label><Input id="price" name="price" type="number" required defaultValue={editingActivity?.price} /></div>
