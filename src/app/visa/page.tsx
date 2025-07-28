@@ -24,12 +24,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Plane, User, Mail, Phone, Globe, FileText, Calendar, Upload, CheckCircle } from 'lucide-react';
+import { Plane, User, Mail, Phone, Globe, FileText, Calendar, Upload, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { useState } from 'react';
 import applyForVisaAction from '@/actions/visa';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import type { VisaFormValues } from '@/types/visa';
 import { visaFormSchema } from '@/types/visa';
+import pLimit from 'p-limit';
 
 const uaeVisaTypes = [
     "Tourist Visa (30/60 Days)",
@@ -67,62 +68,70 @@ export default function VisaPage() {
     },
   });
 
-  const fileRef = form.register("passportCopy");
+  const passportFileRef = form.register("passportCopy");
+  const photoFileRef = form.register("passportPhoto");
+
+  const readFileAsDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+  }
 
   const onSubmit = async (data: VisaFormValues) => {
     setIsLoading(true);
     setFormError(null);
 
-    const file = data.passportCopy[0];
-    const reader = new FileReader();
+    const passportFile = data.passportCopy[0];
+    const photoFile = data.passportPhoto[0];
+    
+    // Use p-limit to handle concurrent file reading
+    const limit = pLimit(2);
 
-    reader.onloadend = async () => {
-      const base64String = reader.result as string;
-      
-      const applicationData = {
-        fullName: data.fullName,
-        email: data.email,
-        phone: data.phone,
-        nationality: data.nationality,
-        destination: data.destination,
-        visaType: data.visaType,
-        travelDates: data.travelDates,
-        notes: data.notes,
-        passportDataUri: base64String,
-      };
+    try {
+        const [passportDataUri, passportPhotoDataUri] = await Promise.all([
+            limit(() => readFileAsDataURL(passportFile)),
+            limit(() => readFileAsDataURL(photoFile))
+        ]);
+        
+        const applicationData = {
+            fullName: data.fullName,
+            email: data.email,
+            phone: data.phone,
+            nationality: data.nationality,
+            destination: data.destination,
+            visaType: data.visaType,
+            travelDates: data.travelDates,
+            notes: data.notes,
+            passportDataUri,
+            passportPhotoDataUri
+        };
 
-      try {
         const result = await applyForVisaAction(applicationData);
 
         if (result.error) {
-          throw new Error(result.error);
+            throw new Error(result.error);
         }
         
         toast({
-          title: 'Visa Application Submitted!',
-          description: result.confirmationMessage || "We will review it and contact you shortly.",
+            title: 'Visa Application Submitted!',
+            description: result.confirmationMessage || "We will review it and contact you shortly.",
         });
 
         form.reset();
-      } catch (error) {
+    } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
         setFormError(errorMessage);
         toast({
             variant: "destructive",
             title: "Submission Failed",
-            description: errorMessage,
+            description: "Failed to read file data. Please try again.",
         });
-      } finally {
+    } finally {
         setIsLoading(false);
-      }
-    };
-
-    reader.onerror = () => {
-        setFormError("Failed to read the passport file. Please try again.");
-        setIsLoading(false);
-    };
-    
-    reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -274,7 +283,18 @@ export default function VisaPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center"><Upload size={14} className="mr-1" /> Passport Copy</FormLabel>
-                        <FormControl><Input type="file" {...fileRef} /></FormControl>
+                        <FormControl><Input type="file" {...passportFileRef} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="passportPhoto"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center"><ImageIcon size={14} className="mr-1" /> Passport Size Photo</FormLabel>
+                        <FormControl><Input type="file" {...photoFileRef} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

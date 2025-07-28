@@ -13,12 +13,17 @@ import {z} from 'genkit';
 import { visaFormSchema, VisaApplicationOutputSchema } from '@/types/visa';
 import type { VisaApplicationOutput } from '@/types/visa';
 
-// Remove passportCopy from the flow input, as we handle the data URI directly.
-const VisaApplicationInputSchema = visaFormSchema.omit({ passportCopy: true }).extend({
+// Remove file fields from the flow input, as we handle the data URIs directly.
+const VisaApplicationInputSchema = visaFormSchema.omit({ passportCopy: true, passportPhoto: true }).extend({
   passportDataUri: z
     .string()
     .describe(
       "A scanned copy of the user's passport, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
+    ),
+  passportPhotoDataUri: z
+    .string()
+    .describe(
+      "The user's passport size photo, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
     ),
 });
 
@@ -36,7 +41,7 @@ const prompt = ai.definePrompt({
   output: {schema: VisaApplicationOutputSchema},
   prompt: `You are a visa processing assistant for Kosheli Travel.
   
-You have received a new visa application. Your task is to review the provided information and the attached passport copy. 
+You have received a new visa application. Your task is to review the provided information and the attached documents.
 
 Generate a unique application ID in the format 'VISA-YYYYMMDD-XXXXXX' where X is a random alphanumeric character.
 
@@ -52,8 +57,9 @@ Applicant Details:
 - Travel Dates: {{travelDates}}
 - Notes: {{notes}}
 
-Passport Document:
-{{media url=passportDataUri}}
+Documents:
+- Passport Document: {{media url=passportDataUri}}
+- Passport Photo: {{media url=passportPhotoDataUri}}
 `,
 });
 
