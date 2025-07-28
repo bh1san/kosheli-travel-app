@@ -30,7 +30,6 @@ import applyForVisaAction from '@/actions/visa';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import type { VisaFormValues } from '@/types/visa';
 import { visaFormSchema } from '@/types/visa';
-import pLimit from 'p-limit';
 
 const uaeVisaTypes = [
     "Tourist Visa (30/60 Days)",
@@ -87,13 +86,10 @@ export default function VisaPage() {
     const passportFile = data.passportCopy[0];
     const photoFile = data.passportPhoto[0];
     
-    // Use p-limit to handle concurrent file reading
-    const limit = pLimit(2);
-
     try {
         const [passportDataUri, passportPhotoDataUri] = await Promise.all([
-            limit(() => readFileAsDataURL(passportFile)),
-            limit(() => readFileAsDataURL(photoFile))
+            readFileAsDataURL(passportFile),
+            readFileAsDataURL(photoFile)
         ]);
         
         const applicationData = {
@@ -127,7 +123,7 @@ export default function VisaPage() {
         toast({
             variant: "destructive",
             title: "Submission Failed",
-            description: "Failed to read file data. Please try again.",
+            description: "Failed to process application. Please check your inputs and try again.",
         });
     } finally {
         setIsLoading(false);
