@@ -2,7 +2,8 @@
 'use server';
 
 import { applyForVisa as applyForVisaFlow } from '@/ai/flows/visa-application-flow';
-import type { VisaApplicationInput, VisaApplicationOutput } from '@/ai/flows/visa-application-flow';
+import type { VisaApplicationInput } from '@/ai/flows/visa-application-flow';
+import type { VisaApplicationOutput } from '@/types/visa';
 
 async function applyForVisaAction(
   input: VisaApplicationInput

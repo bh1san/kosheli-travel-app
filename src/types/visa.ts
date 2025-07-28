@@ -24,3 +24,11 @@ export const visaFormSchema = z.object({
 });
 
 export type VisaFormValues = z.infer<typeof visaFormSchema>;
+
+export const VisaApplicationOutputSchema = z.object({
+  confirmationMessage: z
+    .string()
+    .describe('A confirmation message to be shown to the user upon successful submission.'),
+  applicationId: z.string().describe('A unique ID for the submitted application.'),
+});
+export type VisaApplicationOutput = z.infer<typeof VisaApplicationOutputSchema>;
