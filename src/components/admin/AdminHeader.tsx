@@ -1,9 +1,11 @@
+
 'use client';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 import { Logo } from '../layout/Logo';
+import { logout } from '@/actions/auth';
 
 export function AdminHeader() {
   return (
@@ -14,11 +16,12 @@ export function AdminHeader() {
           <Logo isAdmin={true} />
         </div>
         <div>
-          {/* Placeholder for future logout or user profile */}
-          <Button variant="ghost" size="sm" onClick={() => alert("Logout functionality to be implemented.")}>
-            <LogOut size={16} className="mr-2"/>
-            Logout
-          </Button>
+          <form action={logout}>
+            <Button variant="ghost" size="sm" type="submit">
+              <LogOut size={16} className="mr-2"/>
+              Logout
+            </Button>
+          </form>
         </div>
       </div>
     </header>

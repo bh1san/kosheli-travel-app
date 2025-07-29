@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut, Users, Image as ImageIcon, Users2, FileText } from 'lucide-react';
+import { logout } from '@/actions/auth';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: <LayoutDashboard /> },
@@ -53,10 +54,12 @@ export function AdminSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-2 mt-auto border-t">
-        <Button variant="ghost" className="w-full justify-start text-sm" onClick={() => alert("Logout functionality to be implemented.")}>
-          <LogOut size={16} className="mr-2" />
-          <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-        </Button>
+        <form action={logout} className="w-full">
+            <Button variant="ghost" className="w-full justify-start text-sm" type="submit">
+            <LogOut size={16} className="mr-2" />
+            <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+            </Button>
+        </form>
       </SidebarFooter>
     </Sidebar>
   );
