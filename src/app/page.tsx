@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -11,21 +11,29 @@ import type { Promotion, Activity, Flight, TeamMember } from '@/types';
 import { PromotionList } from '@/components/promotions/PromotionList';
 import { ActivityCard } from '@/components/activities/ActivityCard';
 import { FlightCard } from '@/components/flights/FlightCard';
-import { Plane, MapPin, Sparkles } from 'lucide-react';
+import { Plane, MapPin, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FlightSearchForm } from '@/components/flights/FlightSearchForm';
 import { TeamMemberCard } from '@/components/team/TeamMemberCard';
 import { getData, getDocData } from '@/services/firestore';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 
-const DEFAULT_HERO_IMAGE = 'https://placehold.co/1200x800.png';
+const DEFAULT_HERO_IMAGES = [
+  { src: 'https://placehold.co/1200x800.png', alt: 'Beautiful view of Dubai', dataAiHint: 'dubai cityscape' },
+  { src: 'https://placehold.co/1200x800.png', alt: 'Desert safari adventure', dataAiHint: 'dubai desert' },
+  { src: 'https://placehold.co/1200x800.png', alt: 'Luxury hotel in Dubai', dataAiHint: 'dubai hotel' },
+];
 const SETTINGS_DOC_ID = 'siteSettings';
 
 export default function HomePage() {
-  const [heroImageUrl, setHeroImageUrl] = useState(DEFAULT_HERO_IMAGE);
+  const [heroImages, setHeroImages] = useState(DEFAULT_HERO_IMAGES);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay()]);
 
   useEffect(() => {
     async function loadData() {
@@ -34,7 +42,8 @@ export default function HomePage() {
       // Load settings
       const settings = await getDocData('settings', SETTINGS_DOC_ID);
       if (settings && settings.heroImageUrl) {
-        setHeroImageUrl(settings.heroImageUrl);
+         // Assuming a single URL for now, but this could be adapted for multiple URLs from Firestore
+        setHeroImages([{ src: settings.heroImageUrl, alt: 'Beautiful view of Dubai', dataAiHint: 'dubai cityscape' }, ...DEFAULT_HERO_IMAGES.slice(1)]);
       }
 
       // Load collections
@@ -53,6 +62,9 @@ export default function HomePage() {
 
     loadData();
   }, []);
+
+  const scrollPrev = () => emblaApi?.scrollPrev();
+  const scrollNext = () => emblaApi?.scrollNext();
 
   const featuredPromotions = promotions.slice(0, 3);
   const featuredActivities = activities.slice(0, 3);
@@ -75,17 +87,37 @@ export default function HomePage() {
     <MainLayout>
       <div className="space-y-12">
         {/* Hero Section */}
-        <section className="relative h-[calc(100vh-15rem)] min-h-[400px] md:h-[calc(100vh-20rem)] rounded-xl overflow-hidden shadow-2xl">
-          <Image 
-            src={heroImageUrl} 
-            alt="Beautiful view of Dubai"
-            layout="fill"
-            objectFit="cover"
-            priority
-            data-ai-hint="dubai cityscape"
-            key={heroImageUrl}
-          />
-          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-6">
+        <section className="relative h-[calc(100vh-15rem)] min-h-[400px] md:h-[calc(100vh-20rem)] rounded-xl overflow-hidden shadow-2xl group">
+          <div className="absolute inset-0 bg-black/30 z-10" />
+          <div className="overflow-hidden h-full" ref={emblaRef}>
+            <div className="flex h-full">
+              {heroImages.map((img, index) => (
+                <div className="relative flex-[0_0_100%] h-full" key={index}>
+                  {/* Background Image for blur effect */}
+                  <Image 
+                    src={img.src} 
+                    alt=""
+                    layout="fill"
+                    objectFit="cover"
+                    className="filter blur-sm scale-110"
+                    aria-hidden="true"
+                    key={`${img.src}-bg`}
+                  />
+                  {/* Foreground Image */}
+                  <Image 
+                    src={img.src} 
+                    alt={img.alt}
+                    layout="fill"
+                    objectFit="contain" // Use contain to show the full image
+                    priority={index === 0}
+                    data-ai-hint={img.dataAiHint}
+                    key={img.src}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center p-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-white drop-shadow-lg">
               Discover Dubai with <span className="text-primary">Kosheli Travel</span>
             </h1>
@@ -107,6 +139,21 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
+           {/* Slider Controls */}
+          <Button
+            onClick={scrollPrev}
+            className="absolute z-30 left-4 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 p-0 opacity-0 group-hover:opacity-70 transition-opacity"
+            variant="outline"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <Button
+            onClick={scrollNext}
+            className="absolute z-30 right-4 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 p-0 opacity-0 group-hover:opacity-70 transition-opacity"
+            variant="outline"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
         </section>
         
         {/* Flight Search Section */}
