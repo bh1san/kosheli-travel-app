@@ -9,41 +9,76 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { getDocData, saveDocData } from '@/services/firestore';
+import { Trash2 } from 'lucide-react';
+import { arrayRemove, arrayUnion } from 'firebase/firestore';
 
-const DEFAULT_HERO_IMAGE = 'https://placehold.co/1200x800.png';
 const DEFAULT_LOGO_IMAGE = '/images/logo.png';
 const SETTINGS_DOC_ID = 'siteSettings';
 
+interface HeroImage {
+  id: string;
+  url: string;
+  dataAiHint?: string;
+}
+
 export default function AdminContentPage() {
-  const [heroImageUrl, setHeroImageUrl] = useState(DEFAULT_HERO_IMAGE);
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [logoUrl, setLogoUrl] = useState(DEFAULT_LOGO_IMAGE);
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchSettings() {
+      setIsLoading(true);
       const settings = await getDocData('settings', SETTINGS_DOC_ID);
       if (settings) {
-        setHeroImageUrl(settings.heroImageUrl || DEFAULT_HERO_IMAGE);
+        setHeroImages(settings.heroImages || []);
         setLogoUrl(settings.logoUrl || DEFAULT_LOGO_IMAGE);
       }
+      setIsLoading(false);
     }
     fetchSettings();
   }, []);
 
-  const handleUpdateHeroImage = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleAddHeroImage = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const newUrl = formData.get('heroImageUrl') as string;
     
     if (newUrl) {
-      await saveDocData('settings', SETTINGS_DOC_ID, { heroImageUrl: newUrl });
-      setHeroImageUrl(newUrl);
-      toast({
-        title: 'Content Updated',
-        description: 'The hero banner image has been updated successfully.',
+      const newImage: HeroImage = {
+        id: `img-${Date.now()}`,
+        url: newUrl,
+        dataAiHint: 'dubai cityscape', // Default hint
+      };
+      
+      await saveDocData('settings', SETTINGS_DOC_ID, { 
+        heroImages: arrayUnion(newImage) 
       });
+
+      setHeroImages(prev => [...prev, newImage]);
+      
+      toast({
+        title: 'Image Added',
+        description: 'The new hero banner image has been added.',
+      });
+      (event.target as HTMLFormElement).reset();
     }
   };
+
+  const handleDeleteHeroImage = async (imageToDelete: HeroImage) => {
+    if (confirm('Are you sure you want to delete this banner image?')) {
+        await saveDocData('settings', SETTINGS_DOC_ID, {
+            heroImages: arrayRemove(imageToDelete)
+        });
+        setHeroImages(prev => prev.filter(img => img.id !== imageToDelete.id));
+        toast({
+            title: 'Image Deleted',
+            description: 'The banner image has been removed.',
+            variant: 'destructive'
+        });
+    }
+  }
 
   const handleUpdateLogo = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -60,7 +95,6 @@ export default function AdminContentPage() {
     }
   };
 
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold font-headline">Manage Site Content</h1>
@@ -68,20 +102,39 @@ export default function AdminContentPage() {
       <Card>
         <CardHeader>
           <CardTitle>Homepage Hero Banner</CardTitle>
-          <CardDescription>Update the main image on the homepage. Paste an image URL below.</CardDescription>
+          <CardDescription>Manage the images that appear in your homepage slider.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div>
-            <Label>Current Image Preview:</Label>
-            <div className="mt-2 rounded-lg overflow-hidden border aspect-video max-w-lg relative">
-              <Image src={heroImageUrl} alt="Hero Banner Preview" layout="fill" objectFit="cover" key={heroImageUrl} />
-            </div>
+            <Label>Current Banner Images:</Label>
+            {isLoading ? (
+                <p>Loading images...</p>
+            ) : heroImages.length > 0 ? (
+                <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {heroImages.map((image) => (
+                    <div key={image.id} className="relative group border rounded-lg overflow-hidden">
+                    <Image src={image.url} alt="Hero Banner Preview" width={300} height={200} className="object-cover aspect-video" />
+                    <Button 
+                        variant="destructive" 
+                        size="icon" 
+                        className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleDeleteHeroImage(image)}
+                    >
+                        <Trash2 size={16} />
+                        <span className="sr-only">Delete Image</span>
+                    </Button>
+                    </div>
+                ))}
+                </div>
+            ) : (
+                <p className="text-muted-foreground mt-2">No custom banner images uploaded. The site will use default placeholders.</p>
+            )}
           </div>
-          <form onSubmit={handleUpdateHeroImage} className="space-y-2">
-            <Label htmlFor="heroImageUrl">New Image URL</Label>
+          <form onSubmit={handleAddHeroImage} className="space-y-2 pt-4 border-t">
+            <Label htmlFor="heroImageUrl">Add New Image URL</Label>
             <div className="flex gap-2">
-              <Input id="heroImageUrl" name="heroImageUrl" type="url" placeholder="https://..." required defaultValue={heroImageUrl} />
-              <Button type="submit">Update Image</Button>
+              <Input id="heroImageUrl" name="heroImageUrl" type="url" placeholder="https://..." required />
+              <Button type="submit">Add Image</Button>
             </div>
           </form>
         </CardContent>
@@ -108,7 +161,6 @@ export default function AdminContentPage() {
           </form>
         </CardContent>
       </Card>
-
     </div>
   );
 }

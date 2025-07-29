@@ -1,3 +1,4 @@
+
 // src/services/firestore.ts
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, getDoc, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
@@ -48,7 +49,9 @@ export async function getDocData(collectionName: string, docId: string) {
 export async function saveDocData(collectionName: string, docId: string, data: any) {
     try {
         const docRef = doc(db, collectionName, docId);
-        await setDoc(docRef, data, { merge: true }); // Use merge to avoid overwriting
+        // Use merge: true to avoid overwriting the entire document
+        // This is especially important for updating arrays with arrayUnion/arrayRemove
+        await setDoc(docRef, data, { merge: true });
     } catch (error) {
         console.error(`Error saving document ${docId} in ${collectionName}:`, error);
     }

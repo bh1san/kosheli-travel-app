@@ -19,9 +19,9 @@ import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 
 const DEFAULT_HERO_IMAGES = [
-  { src: 'https://placehold.co/1200x800.png', alt: 'Beautiful view of Dubai', dataAiHint: 'dubai cityscape' },
-  { src: 'https://placehold.co/1200x800.png', alt: 'Desert safari adventure', dataAiHint: 'dubai desert' },
-  { src: 'https://placehold.co/1200x800.png', alt: 'Luxury hotel in Dubai', dataAiHint: 'dubai hotel' },
+  { url: 'https://placehold.co/1200x800.png', alt: 'Beautiful view of Dubai', dataAiHint: 'dubai cityscape' },
+  { url: 'https://placehold.co/1200x800.png', alt: 'Desert safari adventure', dataAiHint: 'dubai desert' },
+  { url: 'https://placehold.co/1200x800.png', alt: 'Luxury hotel in Dubai', dataAiHint: 'dubai hotel' },
 ];
 const SETTINGS_DOC_ID = 'siteSettings';
 
@@ -39,14 +39,15 @@ export default function HomePage() {
     async function loadData() {
       setIsLoading(true);
       
-      // Load settings
       const settings = await getDocData('settings', SETTINGS_DOC_ID);
-      if (settings && settings.heroImageUrl) {
-         // Assuming a single URL for now, but this could be adapted for multiple URLs from Firestore
-        setHeroImages([{ src: settings.heroImageUrl, alt: 'Beautiful view of Dubai', dataAiHint: 'dubai cityscape' }, ...DEFAULT_HERO_IMAGES.slice(1)]);
+      if (settings && Array.isArray(settings.heroImages) && settings.heroImages.length > 0) {
+        setHeroImages(settings.heroImages.map((img: any) => ({
+            url: img.url,
+            alt: img.alt || 'Dubai view',
+            dataAiHint: img.dataAiHint || 'dubai cityscape',
+        })));
       }
 
-      // Load collections
       const promotionsData = await getData<Promotion>('promotions');
       const activitiesData = await getData<Activity>('activities');
       const teamData = await getData<TeamMember>('team');
@@ -54,8 +55,6 @@ export default function HomePage() {
       setPromotions(promotionsData);
       setActivities(activitiesData);
       setTeamMembers(teamData);
-
-      // Flights are still from mock data as per current scope
       setFlights(mockFlights);
       setIsLoading(false);
     };
@@ -69,7 +68,6 @@ export default function HomePage() {
   const featuredPromotions = promotions.slice(0, 3);
   const featuredActivities = activities.slice(0, 3);
   
-  // Find the cheapest flight from Dubai to Nepal (Kathmandu)
   const cheapestFlightToNepal = flights.filter(
     (flight) =>
       flight.departureAirportCode === 'DXB' &&
@@ -86,32 +84,29 @@ export default function HomePage() {
   return (
     <MainLayout>
       <div className="space-y-12">
-        {/* Hero Section */}
         <section className="relative h-[calc(100vh-15rem)] min-h-[400px] md:h-[calc(100vh-20rem)] rounded-xl overflow-hidden shadow-2xl group">
           <div className="absolute inset-0 bg-black/30 z-10" />
           <div className="overflow-hidden h-full" ref={emblaRef}>
             <div className="flex h-full">
               {heroImages.map((img, index) => (
                 <div className="relative flex-[0_0_100%] h-full" key={index}>
-                  {/* Background Image for blur effect */}
                   <Image 
-                    src={img.src} 
+                    src={img.url} 
                     alt=""
                     layout="fill"
                     objectFit="cover"
                     className="filter blur-sm scale-110"
                     aria-hidden="true"
-                    key={`${img.src}-bg`}
+                    key={`${img.url}-bg`}
                   />
-                  {/* Foreground Image */}
                   <Image 
-                    src={img.src} 
+                    src={img.url} 
                     alt={img.alt}
                     layout="fill"
-                    objectFit="contain" // Use contain to show the full image
+                    objectFit="contain"
                     priority={index === 0}
                     data-ai-hint={img.dataAiHint}
-                    key={img.src}
+                    key={img.url}
                   />
                 </div>
               ))}
@@ -139,7 +134,6 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
-           {/* Slider Controls */}
           <Button
             onClick={scrollPrev}
             className="absolute z-30 left-4 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 p-0 opacity-0 group-hover:opacity-70 transition-opacity"
@@ -156,7 +150,6 @@ export default function HomePage() {
           </Button>
         </section>
         
-        {/* Flight Search Section */}
         <section className="-mt-20 relative z-10 mx-auto w-full max-w-5xl px-4">
           <FlightSearchForm />
            <p className="text-center text-xs text-muted-foreground mt-2">
@@ -164,10 +157,8 @@ export default function HomePage() {
           </p>
         </section>
 
-        {/* Featured Promotions */}
         <PromotionList promotions={featuredPromotions} title="Today's Top Deals" />
 
-        {/* Featured Activities */}
         <section className="py-8">
           <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Popular Dubai Activities</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -182,7 +173,6 @@ export default function HomePage() {
           </div>
         </section>
         
-        {/* Featured Flights */}
          <section className="py-8">
           <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Featured Flight to Nepal</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
@@ -199,7 +189,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Team Section */}
         <section className="py-8">
           <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Meet Our Team</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -209,7 +198,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Personalized Recommendations CTA */}
         <section className="py-12 bg-card rounded-lg shadow-lg text-center">
           <Sparkles className="mx-auto h-12 w-12 text-primary mb-4" />
           <h2 className="text-3xl font-headline font-semibold mb-3">Need Trip Ideas?</h2>
