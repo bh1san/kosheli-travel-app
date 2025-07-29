@@ -123,7 +123,7 @@ Now all your project files are safely stored on GitHub.
 
 ## Secure Deployment Practices
 
-To prevent exposing sensitive files like the `.git` directory on a web server, it's crucial to deploy only the necessary build artifacts.
+To prevent exposing sensitive files like the `.git` directory or database backups on a web server, it's crucial to deploy only the necessary build artifacts.
 
 ### Using `git archive`
 
@@ -133,7 +133,7 @@ For manual deployments, you can use `git archive` to create a clean zip file of 
 git archive -o latest.zip HEAD
 ```
 
-Upload `latest.zip` to your server and extract it. This ensures only your application code is deployed.
+Upload `latest.zip` to your server and extract it. This ensures only your application code is deployed. **Never place backup files in a web-accessible directory.**
 
 ### Using a Hosting Provider (Recommended)
 
