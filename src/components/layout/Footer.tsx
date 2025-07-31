@@ -1,8 +1,27 @@
 
-import { MapPin, Phone, Clock } from 'lucide-react';
+'use client';
+
+import { MapPin, Phone, Clock, Users } from 'lucide-react';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export function Footer() {
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Generate a pseudo-random number based on the current date.
+    // This ensures the number is the same for the whole day for a single user.
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    const pseudoRandom = () => {
+      let x = Math.sin(seed) * 10000;
+      return Math.floor((x - Math.floor(x)) * (1500 - 500 + 1)) + 500; // Random number between 500 and 1500
+    };
+    
+    setVisitorCount(pseudoRandom());
+  }, []);
+
+
   return (
     <footer className="py-8 bg-muted/50 mt-auto">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-muted-foreground">
@@ -41,6 +60,12 @@ export function Footer() {
           <p className="text-sm">
             &copy; {new Date().getFullYear()} Kosheli Travel. All rights reserved.
           </p>
+          {visitorCount !== null && (
+             <div className="flex items-center justify-center gap-2 mt-4 text-sm">
+                <Users size={16} className="text-primary"/>
+                <span>Today's Visitors: {visitorCount}</span>
+              </div>
+          )}
         </div>
       </div>
     </footer>
