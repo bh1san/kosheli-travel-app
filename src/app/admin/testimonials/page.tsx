@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,10 +22,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Check, X } from 'lucide-react';
 import Image from 'next/image';
-import { getData, saveTestimonial, deleteTestimonial } from '@/services/firestore';
+import { getData, saveTestimonial, deleteTestimonial, updateTestimonialStatus } from '@/services/firestore';
 import { mockTestimonials } from '@/lib/mockData';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 
 export default function AdminTestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -34,18 +34,19 @@ export default function AdminTestimonialsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
 
-  useEffect(() => {
-    async function fetchTestimonials() {
-      setIsLoading(true);
-      let data = await getData<Testimonial>('testimonials');
-      if (data.length === 0) {
-        // If no data, seed with mock data
-        await Promise.all(mockTestimonials.map(testimonial => saveTestimonial(testimonial)));
-        data = mockTestimonials;
-      }
-      setTestimonials(data);
-      setIsLoading(false);
+  async function fetchTestimonials() {
+    setIsLoading(true);
+    let data = await getData<Testimonial>('testimonials');
+    if (data.length === 0) {
+      // If no data, seed with mock data
+      await Promise.all(mockTestimonials.map(testimonial => saveTestimonial(testimonial)));
+      data = mockTestimonials;
     }
+    setTestimonials(data);
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
     fetchTestimonials();
   }, []);
 
@@ -70,15 +71,14 @@ export default function AdminTestimonialsPage() {
         location: formData.get('location') as string,
         quote: formData.get('quote') as string,
         imageUrl: formData.get('imageUrl') as string || 'https://placehold.co/100x100.png',
+        status: 'approved', // Manually added testimonials are pre-approved
       };
     }
 
     await saveTestimonial(testimonialData);
     
     // Refresh data
-    const updatedTestimonials = await getData<Testimonial>('testimonials');
-    setTestimonials(updatedTestimonials);
-    
+    await fetchTestimonials();
     closeDialog();
   };
   
@@ -93,6 +93,11 @@ export default function AdminTestimonialsPage() {
       setTestimonials(testimonials.filter(t => t.id !== id));
     }
   };
+
+  const handleApproveTestimonial = async (id: string) => {
+    await updateTestimonialStatus(id, 'approved');
+    await fetchTestimonials();
+  };
   
   const closeDialog = () => {
     setIsDialogOpen(false);
@@ -103,6 +108,9 @@ export default function AdminTestimonialsPage() {
     setEditingTestimonial(null);
     setIsDialogOpen(true);
   }
+
+  const pendingTestimonials = testimonials.filter(t => t.status === 'pending');
+  const approvedTestimonials = testimonials.filter(t => t.status === 'approved');
 
   return (
     <div className="space-y-6">
@@ -129,37 +137,79 @@ export default function AdminTestimonialsPage() {
         </Dialog>
       </div>
 
-      <div className="bg-card p-4 rounded-lg shadow-md">
-        {isLoading ? (
-          <p>Loading testimonials...</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Quote</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {testimonials.map((testimonial) => (
-                <TableRow key={testimonial.id}>
-                  <TableCell>
-                    <Image src={testimonial.imageUrl} alt={testimonial.name} width={60} height={60} className="rounded-full object-cover" key={testimonial.imageUrl}/>
-                  </TableCell>
-                  <TableCell>{testimonial.name}</TableCell>
-                  <TableCell className="max-w-sm truncate">{testimonial.quote}</TableCell>
-                  <TableCell className="space-x-2">
-                     <Button variant="outline" size="icon" onClick={() => handleEditClick(testimonial)}><Edit size={16} /></Button>
-                     <Button variant="destructive" size="icon" onClick={() => handleDeleteTestimonial(testimonial.id)}><Trash2 size={16} /></Button>
-                  </TableCell>
+      <Card>
+        <CardHeader>
+            <CardTitle>Pending Approval</CardTitle>
+            <CardDescription>These comments were submitted by users and are waiting for your review.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            {isLoading ? <p>Loading...</p> : (
+                pendingTestimonials.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Quote</TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {pendingTestimonials.map((testimonial) => (
+                            <TableRow key={testimonial.id}>
+                            <TableCell>{testimonial.name} <br/> <span className="text-xs text-muted-foreground">{testimonial.location}</span></TableCell>
+                            <TableCell className="max-w-md">{testimonial.quote}</TableCell>
+                            <TableCell className="space-x-2">
+                                <Button variant="default" size="icon" onClick={() => handleApproveTestimonial(testimonial.id)}><Check size={16} /></Button>
+                                <Button variant="destructive" size="icon" onClick={() => handleDeleteTestimonial(testimonial.id)}><X size={16} /></Button>
+                            </TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <p className="text-muted-foreground">No pending comments.</p>
+                )
+            )}
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+            <CardTitle>Approved Testimonials</CardTitle>
+            <CardDescription>These testimonials are currently displayed on your homepage.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            {isLoading ? (
+            <p>Loading testimonials...</p>
+            ) : (
+            <Table>
+                <TableHeader>
+                <TableRow>
+                    <TableHead>Image</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Quote</TableHead>
+                    <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+                </TableHeader>
+                <TableBody>
+                {approvedTestimonials.map((testimonial) => (
+                    <TableRow key={testimonial.id}>
+                    <TableCell>
+                        <Image src={testimonial.imageUrl} alt={testimonial.name} width={60} height={60} className="rounded-full object-cover" key={testimonial.imageUrl}/>
+                    </TableCell>
+                    <TableCell>{testimonial.name}</TableCell>
+                    <TableCell className="max-w-sm truncate">{testimonial.quote}</TableCell>
+                    <TableCell className="space-x-2">
+                        <Button variant="outline" size="icon" onClick={() => handleEditClick(testimonial)}><Edit size={16} /></Button>
+                        <Button variant="destructive" size="icon" onClick={() => handleDeleteTestimonial(testimonial.id)}><Trash2 size={16} /></Button>
+                    </TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+            )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

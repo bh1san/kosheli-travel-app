@@ -10,6 +10,8 @@ import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { Star } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from '@/lib/firebase';
 
 export function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -17,13 +19,19 @@ export function Testimonials() {
   const [emblaRef] = useEmblaCarousel({ loop: true, align: 'start' }, [Autoplay({ delay: 5000 })]);
 
   useEffect(() => {
-    async function loadTestimonials() {
-      setIsLoading(true);
-      const data = await getData<Testimonial>('testimonials');
-      setTestimonials(data);
+    setIsLoading(true);
+    const q = query(collection(db, "testimonials"), where("status", "==", "approved"));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const approvedTestimonials: Testimonial[] = [];
+      querySnapshot.forEach((doc) => {
+        approvedTestimonials.push({ id: doc.id, ...doc.data() } as Testimonial);
+      });
+      setTestimonials(approvedTestimonials);
       setIsLoading(false);
-    }
-    loadTestimonials();
+    });
+
+    return () => unsubscribe();
   }, []);
 
   if (isLoading) {

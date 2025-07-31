@@ -66,6 +66,7 @@ export interface Testimonial {
   location: string;
   quote: string;
   imageUrl: string;
+  status: 'pending' | 'approved';
 }
 
 export type CartItem = (

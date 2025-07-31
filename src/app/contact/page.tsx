@@ -10,9 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Send } from 'lucide-react';
+import { Send, MessageSquare } from 'lucide-react';
+import { useFormState, useFormStatus } from 'react-dom';
+import { submitComment } from '@/actions/testimonials';
 
-function ContactForm() {
+function BookingInquiryForm() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
@@ -91,20 +93,92 @@ function ContactForm() {
 }
 
 
+function CommentSubmitButton() {
+    const { pending } = useFormStatus();
+    return (
+        <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? 'Submitting...' : 'Submit Comment'}
+        </Button>
+    );
+}
+
+function CommentForm() {
+    const { toast } = useToast();
+    const [state, formAction] = useFormState(async (prevState: any, formData: FormData) => {
+        const result = await submitComment(prevState, formData);
+        if (result.success) {
+            toast({
+                title: 'Comment Submitted!',
+                description: "Thank you for your feedback. It will be reviewed by our team.",
+            });
+            // Returning success to reset the form
+            return { success: true, message: null };
+        }
+        return result;
+    }, { success: false, message: null });
+
+    // This effect will run when the form is successfully submitted
+    // The key is a trick to force the form to re-render and reset
+    const formRef = React.useRef<HTMLFormElement>(null);
+    React.useEffect(() => {
+        if (state.success) {
+            formRef.current?.reset();
+        }
+    }, [state.success]);
+
+
+    return (
+        <Card className="w-full max-w-2xl mx-auto shadow-xl mt-12">
+            <CardHeader>
+                <CardTitle className="text-2xl font-headline text-center">Leave a Comment</CardTitle>
+                <CardDescription className="text-center text-muted-foreground">
+                    Share your experience with us! Your feedback may be featured on our homepage.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form ref={formRef} action={formAction} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <Label htmlFor="commenter-name">Your Name</Label>
+                            <Input id="commenter-name" name="name" required />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="commenter-location">Location (e.g., City, Country)</Label>
+                            <Input id="commenter-location" name="location" required />
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor="comment">Your Comment</Label>
+                        <Textarea id="comment" name="quote" placeholder="Tell us about your trip..." required />
+                    </div>
+                    {state.message && !state.success && (
+                      <p className="text-sm text-destructive">{state.message}</p>
+                    )}
+                    <CommentSubmitButton />
+                </form>
+            </CardContent>
+        </Card>
+    );
+}
+
+
 export default function ContactPage() {
   return (
     <MainLayout>
       <div className="space-y-8">
         <section className="text-center py-8">
-          <h1 className="text-4xl font-bold font-headline text-primary">Book Your Adventure</h1>
+          <h1 className="text-4xl font-bold font-headline text-primary">Get In Touch</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            We're excited to help you plan your trip. Let us know your details to get started.
+            We're here to help you plan your trip or answer any questions.
           </p>
         </section>
         
         <Suspense fallback={<div>Loading form...</div>}>
-          <ContactForm />
+          <BookingInquiryForm />
         </Suspense>
+        
+        <CommentForm />
+
       </div>
     </MainLayout>
   );

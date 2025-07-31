@@ -1,8 +1,7 @@
 
-
 // src/services/firestore.ts
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, getDoc, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
 import type { Activity, Promotion, TeamMember, Testimonial } from '@/types';
 
 // Generic function to fetch a collection
@@ -98,4 +97,9 @@ export async function saveTestimonial(testimonial: Testimonial) {
 export async function deleteTestimonial(id: string) {
     const docRef = doc(db, 'testimonials', id);
     await deleteDoc(docRef);
+}
+
+export async function updateTestimonialStatus(id: string, status: 'approved' | 'pending') {
+    const docRef = doc(db, 'testimonials', id);
+    await updateDoc(docRef, { status });
 }
