@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,6 +9,7 @@ import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { Star } from 'lucide-react';
+import { Skeleton } from '../ui/skeleton';
 
 export function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -27,7 +27,18 @@ export function Testimonials() {
   }, []);
 
   if (isLoading) {
-    return <div className="text-center">Loading testimonials...</div>;
+    return (
+        <section className="py-12 bg-muted/50">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                 <h2 className="text-3xl font-headline font-semibold mb-8 text-center">What Our Customers Say</h2>
+                 <div className="flex gap-4">
+                    <Skeleton className="h-48 w-1/3 rounded-lg" />
+                    <Skeleton className="h-48 w-1/3 rounded-lg" />
+                    <Skeleton className="h-48 w-1/3 rounded-lg" />
+                 </div>
+            </div>
+        </section>
+    );
   }
 
   if (testimonials.length === 0) {
