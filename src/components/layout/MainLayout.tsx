@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import Link from 'next/link';
-import { VisitorCounter } from './VisitorCounter';
+import { StatsCounter } from './StatsCounter';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -29,7 +29,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
-      <VisitorCounter />
+      <StatsCounter />
       <Footer />
        <Link
         href="http://wa.me/+97143538898"
