@@ -1,8 +1,9 @@
 
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plane, ActivitySquare, TicketPercent, BarChart3, Users, Image as ImageIcon } from "lucide-react";
+import { Plane, ActivitySquare, TicketPercent, BarChart3, Users, Image as ImageIcon, MessageSquareQuote } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const managementSections = [
@@ -23,6 +24,12 @@ export default function AdminDashboardPage() {
       description: "Create and manage promotional offers.",
       link: "/admin/promotions",
       icon: <TicketPercent className="h-6 w-6 text-primary" />,
+    },
+     {
+      title: "Manage Testimonials",
+      description: "Add, edit, or delete customer testimonials.",
+      link: "/admin/testimonials",
+      icon: <MessageSquareQuote className="h-6 w-6 text-primary" />,
     },
     {
       title: "Manage Users",

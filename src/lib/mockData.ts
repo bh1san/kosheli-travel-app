@@ -1,4 +1,4 @@
-import type { Flight, Activity, Promotion, TeamMember, Visa } from '@/types';
+import type { Flight, Activity, Promotion, TeamMember, Visa, Testimonial } from '@/types';
 
 export const mockFlights: Flight[] = [
   {
@@ -224,4 +224,28 @@ export const mockVisas: Visa[] = [
   { id: 'VISA001', name: 'Tourist Visa (30 Days)', description: 'Single entry visa for tourism purposes.', destination: 'uae' },
   { id: 'VISA002', name: 'Tourist Visa (60 Days)', description: 'Extended tourist visa for longer stays.', destination: 'uae' },
   { id: 'VISA003', name: 'Schengen Tourist Visa', description: 'Visa for travel across the European Schengen area.', destination: 'europe' },
+];
+
+export const mockTestimonials: Testimonial[] = [
+    {
+        id: 'TEST001',
+        name: 'Aisha Al-Futtaim',
+        location: 'Dubai, UAE',
+        quote: "Kosheli Travel made our desert safari experience absolutely magical! The team was professional, and every detail was perfectly arranged. Highly recommended!",
+        imageUrl: 'https://placehold.co/100x100.png',
+    },
+    {
+        id: 'TEST002',
+        name: 'David Chen',
+        location: 'London, UK',
+        quote: "Booking our flights to Dubai was a breeze. They found us the best deals, and the customer service was exceptional. Will definitely use them again for our next trip.",
+        imageUrl: 'https://placehold.co/100x100.png',
+    },
+    {
+        id: 'TEST003',
+        name: 'Fatima Khan',
+        location: 'Toronto, Canada',
+        quote: "The personalized itinerary they created for our family was incredible. We saw parts of Dubai we would have never found on our own. Thank you, Kosheli Travel!",
+        imageUrl: 'https://placehold.co/100x100.png',
+    },
 ];

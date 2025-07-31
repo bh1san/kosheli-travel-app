@@ -1,4 +1,5 @@
 
+
 export interface Flight {
   id: string;
   airline: string;
@@ -59,7 +60,16 @@ export interface Visa {
     destination: 'uae' | 'europe';
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  location: string;
+  quote: string;
+  imageUrl: string;
+}
+
 export type CartItem = (
   | { itemType: 'flight'; details: Flight }
   | { itemType: 'activity'; details: Activity }
 ) & { quantity: number };
+

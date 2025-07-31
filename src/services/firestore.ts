@@ -1,8 +1,9 @@
 
+
 // src/services/firestore.ts
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, getDoc, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
-import type { Activity, Promotion, TeamMember } from '@/types';
+import type { Activity, Promotion, TeamMember, Testimonial } from '@/types';
 
 // Generic function to fetch a collection
 export async function getData<T>(collectionName: string): Promise<T[]> {
@@ -86,5 +87,15 @@ export async function saveTeamMember(member: TeamMember) {
 
 export async function deleteTeamMember(id: string) {
     const docRef = doc(db, 'team', id);
+    await deleteDoc(docRef);
+}
+
+export async function saveTestimonial(testimonial: Testimonial) {
+    const docRef = doc(db, 'testimonials', testimonial.id);
+    await setDoc(docRef, testimonial);
+}
+
+export async function deleteTestimonial(id: string) {
+    const docRef = doc(db, 'testimonials', id);
     await deleteDoc(docRef);
 }

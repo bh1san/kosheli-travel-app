@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -17,6 +18,7 @@ import { TeamMemberCard } from '@/components/team/TeamMemberCard';
 import { getData, getDocData } from '@/services/firestore';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
+import { Testimonials } from '@/components/testimonials/Testimonials';
 
 const DEFAULT_HERO_IMAGES = [
   { url: 'https://placehold.co/1200x800.png', alt: 'Beautiful view of Dubai', dataAiHint: 'dubai cityscape' },
@@ -188,6 +190,8 @@ export default function HomePage() {
             </Button>
           </div>
         </section>
+
+        <Testimonials />
 
         <section className="py-8">
           <h2 className="text-3xl font-headline font-semibold mb-6 text-center">Meet Our Team</h2>

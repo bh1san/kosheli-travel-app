@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -13,7 +14,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut, Users, Image as ImageIcon, Users2, FileText } from 'lucide-react';
+import { LayoutDashboard, Plane, ActivitySquare, TicketPercent, Settings, LogOut, Users, Image as ImageIcon, Users2, FileText, MessageSquareQuote } from 'lucide-react';
 import { logout } from '@/actions/auth';
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { href: '/admin/flights', label: 'Flights', icon: <Plane /> },
   { href: '/admin/activities', label: 'Activities', icon: <ActivitySquare /> },
   { href: '/admin/promotions', label: 'Promotions', icon: <TicketPercent /> },
+  { href: '/admin/testimonials', label: 'Testimonials', icon: <MessageSquareQuote /> },
   { href: '/admin/users', label: 'Users', icon: <Users /> },
   { href: '/admin/content', label: 'Content', icon: <ImageIcon /> },
   { href: '/admin/visa', label: 'Visa', icon: <FileText /> },
